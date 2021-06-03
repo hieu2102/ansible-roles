@@ -1,0 +1,8 @@
+---
+
+- hosts: test
+  tasks:
+    - command: ping -c 1 localhost
+      register: ping_out
+    - debug:
+        var: ping_out.stdout
