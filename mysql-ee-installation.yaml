@@ -2,22 +2,23 @@
 - hosts: repo_server
   gather_facts: no
   vars:
+    #mysql EE 8 OL 7
     download_URL: https://updates.oracle.com/Orion/Services/download/p32866622_580_Linux-x86-64.zip?aru=24223247&patch_file=p32866622_580_Linux-x86-64.zip
     download_dest: /opt/setup/mysql8.zip
   tasks:
     - name: disable security
-      include_role: 
+      include_role:
         - name: configure_security
 
-    - name: download repo 
-      include_role: 
+    - name: download repo
+      include_role:
         name: my_oracle_support_download
 
     - name: setup repo
       block:
         - name: unzip
           ansible.builtin.unarchive:
-            src: { { download_dest } }
+            src: "{{ download_dest }}"
             dest: /opt/
             remote_src: yes
 
@@ -25,17 +26,17 @@
           shell: find /opt -name "mysql-commercial*.tar.gz"
           register: tar_file
 
-        - name: create repo 
+        - name: create repo
           include_role:
             name: setup_yum_repo
-            vars: 
+            vars:
               tarball: "{{ tar_file }}"
               repo_name: mysql8-EE
         # - name: get mysql patch version
         #   shell: find /opt/mysql-8.0 -type d |grep "/8.0.[0-9]*"|grep -v repodata
         #   register: mysql_repo_dir
 
-
+#################################################################################################################################
 
 - hosts: test
   gather_facts: no
@@ -43,7 +44,6 @@
     mysql_port: 3306
     mysql_password: oracle_4U
     remote_user: root
-    #mysql EE 8 OL 7
     mysql_log_file: /var/log/mysqld.log
   tasks:
     - name: Configure Security
@@ -71,13 +71,36 @@
                 name:
                   - mysql-commercial-server
                   - mysql-shell-commercial
-
         - name: Configure MySQL
           block:
-            - name: start service
-              shell: systemctl start mysqld && systemctl enable mysqld
-            - name: get temp password
-              shell: cat "{{ mysql_log_file }}"|grep -i temporary | tail -1 | awk '{print $NF}'
-              args:
-                executable: /bin/bash
-              register: mysql_temp_password
+            - name: set configuration 
+              include_role:
+                - name: mysql_configuration
+            - name: reset root password
+              block:
+                - name: skip grant tables
+                  lineinfile:
+                    path: /etc/my.cnf
+                    line: skip-grant-tables
+                    state: present
+                    insertafter: '\[mysqld\]'
+
+                - name: start service
+                  ansible.builtin.systemd:
+                    state: started
+                    name: mysqld
+
+                - name: set root password
+                  shell: mysql -e "flush privileges;alter user root@'localhost' identified by '{{ mysql_password }}';"
+              
+                - name: remove skip grant tables 
+                  lineinfile:
+                    path: /etc/my.cnf
+                    line: skip-grant-tables
+                    state: absent
+
+            - name: start & enable service
+              ansible.builtin.systemd:
+                name: mysqld 
+                state: started
+                enabled: yes

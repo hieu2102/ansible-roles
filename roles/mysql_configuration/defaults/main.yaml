@@ -1,0 +1,5 @@
+---
+datadir: /var/lib/mysql
+log-bin: /var/lib/mysql
+expire-log-days: 30 
+error_log: /var/log/mysqld.log

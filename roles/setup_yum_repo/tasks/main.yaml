@@ -10,10 +10,7 @@
       ansible.builtin.systemd:
         state: started
         name: httpd
-    - name: Enable httpd
-      ansible.builtin.systemd:
-        state: enabled
-        name: httpd
+        enabled: yes 
 
 - name: Get Repo server information
   shell: hostname -f
@@ -23,7 +20,7 @@
     - name: extract tarball
       ansible.builtin.unarchive:
       src: "{{ tarball.stdout }}"
-      dest: "/var/www/html/{{ repo_name }}"
+      dest: "/var/www/html/{{ repo_name.stdout }}"
       remote_src: yes
     - name: create repo file
       blockinfile:
@@ -32,6 +29,6 @@
         block: |
           [{{ repo_name }}]
           name = {{ repo_name }}
-          baseurl = http://{{ repo_server_hostname }}/{{ repo_name }}
+          baseurl = http://{{ repo_server_hostname.stdout }}/{{ repo_name }}
           enabled = 1 
           gpgcheck = 0 
