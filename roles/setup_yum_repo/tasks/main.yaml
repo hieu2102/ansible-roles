@@ -1,0 +1,37 @@
+---
+- name: Install & configurehttpd
+  block:
+    - name: install httpd
+      ansible.builtin.yum:
+        name:
+          - httpd
+        state: present
+    - name: Start httpd
+      ansible.builtin.systemd:
+        state: started
+        name: httpd
+    - name: Enable httpd
+      ansible.builtin.systemd:
+        state: enabled
+        name: httpd
+
+- name: Get Repo server information
+  shell: hostname -f
+  register: repo_server_hostname
+- name: Configure Repository
+  block:
+    - name: extract tarball
+      ansible.builtin.unarchive:
+      src: "{{ tarball.stdout }}"
+      dest: "/var/www/html/{{ repo_name }}"
+      remote_src: yes
+    - name: create repo file
+      blockinfile:
+        path: "/etc/yum.repos.d/{{ repo_name }}.repo"
+        create: yes
+        block: |
+          [{{ repo_name }}]
+          name = {{ repo_name }}
+          baseurl = http://{{ repo_server_hostname }}/{{ repo_name }}
+          enabled = 1 
+          gpgcheck = 0 

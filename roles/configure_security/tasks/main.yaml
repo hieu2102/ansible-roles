@@ -1,0 +1,23 @@
+---
+- name: Check Server Security Configuration
+  block:
+    - name: SELinux
+      command: getenforce
+      register: selinux
+
+    - name: FirewallD
+      shell: systemctl status firewalld|grep Active|awk '{print $2}'
+      register: firewall_status
+
+- name: Update Security Configuration
+  block:
+    - name: disable SELinux
+      shell: setenforce 0 && sed -i -e "s|SELINUX=enforcing|SELINUX=permissive|g" /etc/selinux/config
+      args:
+        executable: /bin/bash
+      when: selinux.stdout == "Enforcing"
+
+    - name: stop FirewallD
+      shell: systemctl stop firewalld && systemctl disable firewalld
+      when: firewall_status.stdout == "active"
+

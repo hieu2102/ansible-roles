@@ -1,79 +1,62 @@
 ---
+- hosts: repo_server
+  gather_facts: no
+  vars:
+    download_URL: https://updates.oracle.com/Orion/Services/download/p32866622_580_Linux-x86-64.zip?aru=24223247&patch_file=p32866622_580_Linux-x86-64.zip
+    download_dest: /opt/setup/mysql8.zip
+  tasks:
+    - name: disable security
+      include_role: 
+        - name: configure_security
+
+    - name: download repo 
+      include_role: 
+        name: my_oracle_support_download
+
+    - name: setup repo
+      block:
+        - name: unzip
+          ansible.builtin.unarchive:
+            src: { { download_dest } }
+            dest: /opt/
+            remote_src: yes
+
+        - name: find unzipped file
+          shell: find /opt -name "mysql-commercial*.tar.gz"
+          register: tar_file
+
+        - name: create repo 
+          include_role:
+            name: setup_yum_repo
+            vars: 
+              tarball: "{{ tar_file }}"
+              repo_name: mysql8-EE
+        # - name: get mysql patch version
+        #   shell: find /opt/mysql-8.0 -type d |grep "/8.0.[0-9]*"|grep -v repodata
+        #   register: mysql_repo_dir
+
+
+
 - hosts: test
   gather_facts: no
   vars:
     mysql_port: 3306
     mysql_password: oracle_4U
     remote_user: root
-    sso_user: support@bnh.vn
-    sso_passwd: BNHdba@2020
-    sso_cookie: /tmp/wget_oracle_sso
-    mysql8_el7: https://updates.oracle.com/Orion/Services/download/p32866622_580_Linux-x86-64.zip?aru=24223247&patch_file=p32866622_580_Linux-x86-64.zip
+    #mysql EE 8 OL 7
     mysql_log_file: /var/log/mysqld.log
   tasks:
-    - name: Check server configuration
-      block: 
-        - name: selinux
-          command: getenforce
-          register: selinux
+    - name: Configure Security
+      include_role:
+        - name: configure_security
 
-        - name: firewalld
-          shell: systemctl status firewalld|grep Active|awk '{print $2}'
-          register: firewall_status
-
-        - name: os version
-          shell: uname -a |awk '{print $3}'
-          register: os_version
-
-    - name: Update server configuration
+    - name: Install MySQL EE
       block:
-        - name: change SELinux configuration
-          shell: setenforce 0 && sed -i -e "s|SELINUX=enforcing|SELINUX=permissive|g" /etc/selinux/config
-          args:
-            executable: /bin/bash
-          when: selinux.stdout == "Enforcing"
-        
-        - name: stop firewalld
-          shell: systemctl stop firewalld && systemctl disable firewalld
-          when: firewall_status.stdout == "active"
-
-    - name: Install MySQL EE 
-      block: 
-        - name: Setup YUM repostiory 
-          block:
-            - name: login
-              shell: wget  --secure-protocol=auto --save-cookies="{{ sso_cookie }}" --keep-session-cookies  --http-user "{{ sso_user }}" --password "{{ sso_passwd }}" "https://updates.oracle.com/Orion/Services/download" -O /dev/null
-            - name: download
-              shell: wget  --load-cookies="{{ sso_cookie }}" "{{ mysql8_el7 }}" -O "/tmp/mysql.zip"
-              when: os_version.stdout is search ("el7uek.x86_64")
-
-            - name: extract
-              block: 
-                - name: unzip
-                  ansible.builtin.unarchive: 
-                    src: /tmp/mysql.zip
-                    dest: /opt/
-                    remote_src: yes
-                - name: find unzipped file
-                  shell: find /opt -name "mysql-commercial*.tar.gz"
-                  register: tar_file
-                - name: untar
-                  ansible.builtin.unarchive:
-                    src: "{{ tar_file.stdout }}"
-                    dest: /opt
-                    remote_src: yes
-
-            - name: get mysql patch version 
-              shell: find /opt/mysql-8.0 -type d |grep "/8.0.[0-9]*"|grep -v repodata
-              register: mysql_repo_dir
-            - name: create yum repo configuration 
-              shell: 
-                cmd: |
-                  echo '[mysql-ee-8]
-                  name = MySQL Enterprise 8.0
-                  baseurl=file://{{ mysql_repo_dir.stdout }}
-                  enabled=1
-                  gpgcheck=0' > /etc/yum.repos.d/mysql-ee.repo
+        - name: Get YUM repo config file
+          synchronize:
+            src: "/etc/yum.repos.d/mysql8-EE.repo"
+            dest: "/etc/yum.repos.d/mysql8-EE.repo"
+          delegate_to: repo_server
 
         - name: Install MySQL Enterprise
           block:
@@ -85,11 +68,12 @@
                 state: removed
             - name: install enterprise
               ansible.builtin.yum:
-                name: 
+                name:
                   - mysql-commercial-server
                   - mysql-shell-commercial
-        - name: Configure MySQL 
-          block: 
+
+        - name: Configure MySQL
+          block:
             - name: start service
               shell: systemctl start mysqld && systemctl enable mysqld
             - name: get temp password
@@ -97,5 +81,3 @@
               args:
                 executable: /bin/bash
               register: mysql_temp_password
-            - msg: "MySQL temporary password: {{ mysql_temp_password }}" 
-               

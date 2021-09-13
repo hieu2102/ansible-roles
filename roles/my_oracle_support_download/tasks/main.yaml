@@ -1,0 +1,5 @@
+---
+- name: login My Oracle Support
+  shell: wget --secure-protocol=auto --save-cookies="{{ sso_cookie }}" --keep-session-cookies  --http-user "{{ sso_user }}" --password "{{ sso_passwd }}" "https://updates.oracle.com/Orion/Services/download" -O /dev/null
+- name: download file
+  shell: wget  --load-cookies="{{ sso_cookie }}" "{{ download_URL }}" -O "{{ download_dest }}"

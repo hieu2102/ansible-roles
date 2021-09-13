@@ -1,0 +1,34 @@
+---
+- hosts: ndb
+  gather_facts: no 
+  vars:
+    sso_user: support@bnh.vn
+    sso_password: BNHdba@2020
+    sso_cookie: /tmp/wget_oracle_sso
+    ndb8_el7: https://updates.oracle.com/Orion/Services/download/p32897318_800_Linux-x86-64.zip?aru=24235955&patch_file=p32897318_800_Linux-x86-64.zip
+    mysql_log_file: /var/log/mysqld.log
+
+  tasks:
+    - name: Prep environment
+      block:
+        - name: uninstall mariadb/ mysql community
+          ansible.builtin.yum:
+            name:
+              - mariadb* 
+              - mysql* 
+            state: absent
+        - name: download repository 
+          block:
+            - name: login MOS
+              shell: wget --secure-protocol=auto --save-cookies="{{ sso_cookie }}" --keep-session-cookies --http-user "{{ sso_user }}" --password "{{ sso_password }}" "https://updates.oracle.com/Orion/Services/download" -O /dev/null
+            - name: download
+              shell: wget --load-cookies="{{ sso_cookie }}" "{{ ndb8_el7 }}" -O "/tmp/mysql.zip"
+              # when: os_version.stdout is search ("el7uek.x86_64")
+            
+            - name: extract repo
+              block:
+                - name: unzip 
+                  ansible.builtin.unarchive:
+                    src: /tmp/mysql.zip
+                    dest: /opt/
+                    remote_src: yes 
