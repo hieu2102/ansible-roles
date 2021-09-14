@@ -12,6 +12,9 @@
         remote_src: true 
         src: /etc/my.cnf 
         dest: /etc/my.cnf.OLD
+        owner: mysql 
+        group: mysql
+        mode: '0600'
     - name: remove my.cnf
       ansible.builtin.file: 
         path: /etc/my.cnf
@@ -21,6 +24,9 @@
   ansible.builtin.blockinfile:
     path: /etc/my.cnf
     create: yes
+    owner: mysql 
+    group: mysql
+    mode: '0600'
     block: | 
       bind-address = 0.0.0.0
       socket = /tmp/mysqld.sock

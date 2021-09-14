@@ -12,23 +12,25 @@
         name: httpd
         enabled: yes 
 
-- name: Get Repo server information
-  shell: hostname -f
-  register: repo_server_hostname
 - name: Configure Repository
   block:
     - name: extract tarball
       ansible.builtin.unarchive:
-      src: "{{ tarball.stdout }}"
-      dest: "/var/www/html/{{ repo_name.stdout }}"
-      remote_src: yes
+        src: "{{ tarball.stdout }}"
+        dest: /var/www/html/"{{ repo_name.stdout }}"
+        remote_src: yes
+        owner: root 
+        group: root 
     - name: create repo file
       blockinfile:
         path: "/etc/yum.repos.d/{{ repo_name }}.repo"
+        owner: root 
+        group: root 
+        mode: '666'
         create: yes
         block: |
           [{{ repo_name }}]
           name = {{ repo_name }}
-          baseurl = http://{{ repo_server_hostname.stdout }}/{{ repo_name }}
+          baseurl = http://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}/{{ repo_name }}
           enabled = 1 
           gpgcheck = 0 

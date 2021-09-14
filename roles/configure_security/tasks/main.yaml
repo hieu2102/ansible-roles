@@ -18,6 +18,10 @@
       when: selinux.stdout == "Enforcing"
 
     - name: stop FirewallD
-      shell: systemctl stop firewalld && systemctl disable firewalld
-      when: firewall_status.stdout == "active"
+      ansible.builtin.systemd:
+        name: firewalld
+        state: stopped 
+        enabled: false
+      # shell: systemctl stop firewalld && systemctl disable firewalld
+      # when: firewall_status.stdout == "active"
 
