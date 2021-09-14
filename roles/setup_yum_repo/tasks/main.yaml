@@ -1,5 +1,5 @@
 ---
-- name: Install & configurehttpd
+- name: Install & configure httpd
   block:
     - name: install httpd
       ansible.builtin.yum:
@@ -14,23 +14,39 @@
 
 - name: Configure Repository
   block:
+    - name: create repo directory 
+      ansible.builtin.file:
+        path: /var/www/html/{{ repo_name }}
+        state: directory
+        owner: root 
+        group: root 
+        mode: '0755'
     - name: extract tarball
       ansible.builtin.unarchive:
         src: "{{ tarball.stdout }}"
-        dest: /var/www/html/"{{ repo_name.stdout }}"
+        dest: /var/www/html/{{ repo_name }}
         remote_src: yes
         owner: root 
-        group: root 
+        group: root
+        list_files: True
+      register: file_list
+    - name: get repo path 
+      ansible.builtin.find:
+        path: /var/www/html/{{ repo_name }}
+        file_type: directory
+        recurse: yes
+        patterns: "repodata"
+      register: dir_matches
     - name: create repo file
       blockinfile:
         path: "/etc/yum.repos.d/{{ repo_name }}.repo"
         owner: root 
         group: root 
-        mode: '666'
+        mode: '0755'
         create: yes
         block: |
           [{{ repo_name }}]
           name = {{ repo_name }}
-          baseurl = http://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}/{{ repo_name }}
+          baseurl = http://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}/{{ dir_matches.files[0].path | dirname | regex_replace('/var/www/html/','') }}
           enabled = 1 
           gpgcheck = 0 

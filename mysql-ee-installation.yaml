@@ -1,11 +1,11 @@
 ---
 - name: setup repo
-  hosts: localhost
-  gather_facts: no
+  hosts: repo_server
+  gather_facts: yes
   vars:
     download_url: "https://updates.oracle.com/Orion/Services/download/p32866622_580_Linux-x86-64.zip?aru=24223247&patch_file=p32866622_580_Linux-x86-64.zip"
-    # download_dest: /opt/setup/mysql8.zip
-    download_dest: /Users/hieunguyen/Downloads/test.zip
+    download_dest: /opt/setup/mysql8.zip
+    # download_dest: /Users/hieunguyen/Downloads/test.zip
   
   tasks:
     - name: disable security
@@ -34,9 +34,6 @@
           vars:
             tarball: "{{ tar_file }}"
             repo_name: mysql8-EE
-        # - name: get mysql patch version
-        #   shell: find /opt/mysql-8.0 -type d |grep "/8.0.[0-9]*"|grep -v repodata
-        #   register: mysql_repo_dir
 
 #################################################################################################################################
 
@@ -46,8 +43,7 @@
   vars:
     mysql_port: 3306
     mysql_password: oracle_4U
-    remote_user: root
-    mysql_log_file: /var/log/mysqld.log
+    error_log: /var/log/mysqld.log
   tasks:
     - name: Configure Security
       include_role:
@@ -57,9 +53,9 @@
       block:
         - name: Get YUM repo config file
           synchronize:
-            src: "/etc/yum.repos.d/mysql8-EE.repo"
-            dest: "/etc/yum.repos.d/mysql8-EE.repo"
-          delegate_to: repo_server
+            src: /etc/yum.repos.d/mysql8-EE.repo
+            dest: /etc/yum.repos.d/mysql8-EE.repo
+          delegate_to: "{{ groups['repo_server'][0] }}"
 
         - name: Install MySQL Enterprise
           block:
@@ -74,11 +70,16 @@
                 name:
                   - mysql-commercial-server
                   - mysql-shell-commercial
+                state: present
         - name: Configure MySQL
           block:
             - name: set configuration
               include_role:
                 name: mysql_configuration
+            - name: init MySQL 
+              systemd:
+                name: mysqld 
+                state: started
             - name: reset root password
               block:
                 - name: skip grant tables
@@ -88,14 +89,13 @@
                     state: present
                     insertafter: '\[mysqld\]'
 
-                - name: start service
+                - name: restart service
                   ansible.builtin.systemd:
-                    state: started
+                    state: restarted
                     name: mysqld
 
                 - name: set root password
                   shell: mysql -e "flush privileges;alter user root@'localhost' identified by '{{ mysql_password }}';"
-
                 - name: remove skip grant tables
                   lineinfile:
                     path: /etc/my.cnf

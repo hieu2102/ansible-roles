@@ -1,5 +1,7 @@
 ---
 datadir: /var/lib/mysql
-log_bin: /var/lib/mysql
+binlog_dir: /var/lib/mysql
 expire_log_days: 30 
 error_log: /var/log/mysqld.log
+config_file: /etc/my.cnf
+socket: /tmp/mysqld.sock

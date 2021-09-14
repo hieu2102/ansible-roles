@@ -1,8 +1,18 @@
 ---
-
-- hosts: test
+- hosts: repo_server
+  gather_facts: yes
   tasks:
-    - command: ping -c 1 localhost
-      register: ping_out
-    - debug:
-        var: ping_out.stdout
+    - debug: msg="{{ hostvars[inventory_hostname]['ansible_nodename'] }}"
+    # - name: tests
+      # include_role:
+        # name: mysql_configuration
+    # - name: check file 
+    #   find: 
+    #     path: /var/www/html
+    #     file_type: directory
+    #     recurse: yes
+    #     patterns: "repodata"
+    #   register: matches
+    # - name: debug 
+    #   debug:
+    #     msg: "{{ matches.files[0].path | dirname c| regex_replace('/var/www/html/','') }}"
