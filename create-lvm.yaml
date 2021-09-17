@@ -7,3 +7,6 @@
     - name: create LVM
       include_role: 
         name: linux-create-lvm
+      vars:
+        vg_name: cloudera_vg
+        lv_name: cloudera_lv
