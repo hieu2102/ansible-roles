@@ -1,0 +1,9 @@
+---
+- name: create LVM
+  hosts: repo_server
+  gather_facts: yes
+  
+  tasks:
+    - name: create LVM
+      include_role: 
+        name: linux-create-lvm

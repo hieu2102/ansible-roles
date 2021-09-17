@@ -1,0 +1,43 @@
+---
+- name: create partition
+  community.general.parted:
+    device: "{{ device_path }}"
+    number: 1
+    flags: [ lvm ]
+    state: present
+
+- name: Install lvm2 dependency
+  package:
+    name: lvm2
+    state: present
+
+- name: task for creating volume group
+  lvg:
+      vg: "{{ vg_name }}"
+      pvs: "{{ device_path }}1"
+      pesize: 16
+
+- name: task for creating logical volume
+  lvol:
+      vg: "{{ vg_name }}"
+      lv:  "{{ lv_name }}"
+      size: "{{ volume_size -1 | int }}g"
+      force: yes
+
+- name: Create mount point
+  file:
+    path: "{{ mount_point }}"
+    state: directory
+    mode: '0755'
+
+- name: format the xfs filesystem
+  filesystem:
+    fstype: xfs
+    dev: "/dev/{{ vg_name }}/{{ lv_name }}"
+
+- name: mount the lv
+  mount:
+    path: "{{ mount_point }}"
+    src: "/dev/{{ vg_name }}/{{ lv_name }}"
+    fstype: xfs
+    state: mounted

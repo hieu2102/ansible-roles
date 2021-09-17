@@ -1,0 +1,9 @@
+---
+- name: install docker
+  hosts: repo_server
+  gather_facts: no 
+
+  tasks: 
+    - name: install docker 
+      include_role:
+        name: linux-install-docker

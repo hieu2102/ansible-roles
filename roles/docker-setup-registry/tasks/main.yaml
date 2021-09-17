@@ -1,0 +1,59 @@
+---
+- name: import CA
+  block:
+    - name: copy CA
+      ansible.builtin.copy:
+        src: "{{ role_path }}/files/registry-ca.pem"
+        dest: /etc/pki/ca-trust/source/anchors
+        mode: '0644'
+    - name: import certs # noqa command-instead-of-shell
+      shell: /bin/update-ca-trust
+- name: setup directories
+  block:
+    - name: data dir 
+      ansible.builtin.file:
+        path: "{{ datadir }}"
+        state: directory
+        mode: '0644'
+    - name: certs dir
+      ansible.builtin.file:
+        path: "{{ certs_dir }}"
+        state: directory
+        mode: '0644'
+    - name: auth dir 
+      ansible.builtin.file:
+        path: "{{ auth_dir }}"
+        state: directory 
+        mode: '0644'
+- name: pull images
+  community.docker.docker_image:
+    name: registry:2
+    pull: yes
+- name: generate user # noqa command-instead-of-shell
+  block:
+    - name: generate temp file 
+      shell: "htpasswd -Bbn {{ username }} {{ password }} >> /tmp/htpasswd_registry"
+      register: htpasswd_entry
+    - name: append entry 
+      ansible.builtin.lineinfile:
+        path: "{{ auth_dir }}/htpasswd"
+        state: present
+        line: htpasswd_entry.stdout
+- name: deploy registry
+  community.docker.docker_container:
+    name: registry
+    image: registry:2 
+    state: started 
+    restart: yes 
+    ports: 
+      - "443:5000"
+    volumes:
+      - "{{ datadir }}:/var/lib/registry"
+      - "{{ certs_dir }}:/certs"
+      - "{{ auth_dir }}:/auth"
+    env:
+      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/registry.crt
+      REGISTRY_HTTP_TLS_KEY: /certs/registry.key
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_REALM: "Registry Realm"
+      REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
