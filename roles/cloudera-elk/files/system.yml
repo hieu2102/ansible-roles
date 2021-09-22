@@ -1,0 +1,59 @@
+# Module: system
+# Docs: https://www.elastic.co/guide/en/beats/filebeat/7.13/filebeat-module-system.html
+
+- module: system
+  # Syslog
+  syslog:
+    enabled: true
+    # Set custom paths for the log files. If left empty,
+    # Filebeat will choose the paths depending on your OS.
+    var.paths:
+      - "/var/log/atlas/*.log"
+      - "/var/log/atlas/*.out"
+      - "/var/log/hbase/*.log"
+      - "/var/log/hbase/*.out"
+      - "/var/log/hadoop-hdfs/*.log"
+      - "/var/log/hadoop-hdfs/*.out"
+      - "/var/log/hive/*.log"
+      - "/var/log/hive/*.out"
+      - "/var/log/hcatalog/*.log"
+      - "/var/log/hcatalog/*.out"
+      - "/var/log/hue/*.log"
+      - "/var/log/hue/*.out"
+      - "/var/log/hue-httpd/*.log"
+      - "/var/log/hue-httpd/*.out"
+      - "/var/log/catalogd/*.log"
+      - "/var/log/catalogd/*.out"
+      - "/var/log/impalad/*.log"
+      - "/var/log/impalad/*.out"
+      - "/var/log/statestore/*.log"
+      - "/var/log/statestore/*.out"
+      - "/var/log/kafka/*.log"
+      - "/var/log/kafka/*.out"
+      - "/var/log/oozie/*.log"
+      - "/var/log/oozie/*.out"
+      - "/var/log/ranger/admin/*.log"
+      - "/var/log/ranger/admin/*.out"
+      - "/var/log/ranger/tagsync/*.log"
+      - "/var/log/ranger/tagsync/*.out"
+      - "/var/log/ranger/usersync/*.log"
+      - "/var/log/ranger/usersync/*.out"
+      - "/var/log/schemaregistry/*.log"
+      - "/var/log/schemaregistry/*.out"
+      - "/var/log/solr-infra/*.log"
+      - "/var/log/solr-infra/*.out"
+      - "/var/log/spark/*.log"
+      - "/var/log/spark/*.out"
+      - "/var/log/hadoop-mapreduce/*.log"
+      - "/var/log/hadoop-mapreduce/*.out"
+      - "/var/log/hadoop-yarn/*.log"
+      - "/var/log/hadoop-yarn/*.out"
+      - "/var/log/zookeeper/*.log"
+      - "/var/log/zookeeper/*.out"
+      # - "/var/log/messages"
+  # Authorization logs
+  auth:
+    enabled: false
+    # Set custom paths for the log files. If left empty,
+    # Filebeat will choose the paths depending on your OS.
+    #var.paths:

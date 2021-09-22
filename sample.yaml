@@ -1,11 +1,11 @@
 ---
-- hosts: localhost
+- hosts: cloudera
   gather_facts: yes
   tasks:
     # - debug: msg="{{ hostvars[inventory_hostname]['ansible_nodename'] }}"
     - name: tests
       include_role:
-        name: mysql_configuration
+        name: cloudera-elk
     # - name: check file 
     #   find: 
     #     path: /var/www/html

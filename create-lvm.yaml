@@ -1,6 +1,6 @@
 ---
 - name: create LVM
-  hosts: repo_server
+  hosts: cloudera
   gather_facts: yes
   
   tasks:
@@ -10,3 +10,4 @@
       vars:
         vg_name: cloudera_vg
         lv_name: cloudera_lv
+        mount_point: /opt

@@ -1,0 +1,24 @@
+---
+- name: install filebeat
+  ansible.builtin.yum:
+    name: 
+      - "{{ filebeat_rpm }}"
+    state: present
+
+- name: configure filebeat
+  block:
+    - name: filebeat config file 
+      ansible.builtin.copy:
+        src: filebeat.yml
+        dest: /etc/filebeat/filebeat.yml
+        mode: 0644
+    - name: filebeat system module config file 
+      ansible.builtin.copy:
+        src: system.yml
+        dest: /etc/filebeat/modules.d/system.yml
+        mode: 0644
+- name: start filebeat
+  ansible.builtin.systemd:
+    name: filebeat
+    state: restarted
+    enabled: yes 
