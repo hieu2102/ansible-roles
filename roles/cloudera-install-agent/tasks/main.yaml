@@ -1,0 +1,29 @@
+---
+- name: Install Kerberos
+  ansible.builtin.yum:
+    name: 
+      - krb5-workstation
+      - krb5-libs
+    state: present
+- name: Setup CDP Repository 
+  ansible.bultin.yum_repository:
+    name: cloudera-cdp
+    description: Cloudera Data Platform YUM Repository 
+    baseurl: "{{ cdp_repo_url }}"
+    enabled: yes 
+    gpgcheck: no 
+- name: Install CDP agent
+  ansible.builtin.yum:
+    name: cloudera-manager-agent
+    state: present
+- name: configure agent 
+  ansible.builtin.lineinfile:
+    path: /etc/cloudera-scm-agent/config.ini
+    line: "server_host={{ cdp_host }}"
+    regexp: '^server_host=localhost.*$'
+    backrefs: yes 
+- name: start agent
+  ansible.bultin.systemd:
+    name: cloudera-scm-agent
+    state: started
+    enabled: yes 
