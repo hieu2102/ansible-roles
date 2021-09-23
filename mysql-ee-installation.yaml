@@ -10,11 +10,11 @@
   tasks:
     - name: disable security
       include_role:
-        name: configure_security
+        name: linux-configure-security
 
     - name: download repo
       include_role:
-        name: my_oracle_support_download
+        name: oracle-MOS-download
 
     - name: setup repo
       block:
