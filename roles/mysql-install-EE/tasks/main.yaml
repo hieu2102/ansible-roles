@@ -1,0 +1,34 @@
+---
+- name: Uninstall MariaDB/MySQL Community Edition 
+  ansible.builtin.yum:
+    name:
+      - mariadb* 
+      - mysql-community*
+    state: absent
+
+- name: Install MySQL Enterprise Edition 
+  ansible.builtin.yum:
+    name: 
+      - mysql-commercial-server
+      - mysql-shell-commercial
+    state: present
+
+- name: Allow SSH using mysql 
+  ansible.builtin.user:
+    name: mysql
+    group: mysql 
+    shell: /bin/bash 
+    home: /home/mysql 
+    create_home: yes 
+    password: "{{ mysql_os_password }}"
+    update_password: always
+  
+- name: Configure MySQL Instance
+  include_tasks: configure-mysql-instance.yaml
+- name: Start (Init) MySQLd Service
+  ansible.builtin.systemd:
+    name: mysqld
+    state: started
+    enabled: yes 
+- name: Execute MySQL Secure Installation 
+  include_tasks: mysql-secure-installation.yaml

@@ -1,0 +1,24 @@
+---
+- name: Skip grant tables
+  ansible.builtin.lineinfile:
+    path: /etc/my.cnf
+    line: skip-grant-tables
+    state: present
+    insertafter: '\[mysqld\]'
+
+- name: Restart MySQLd Instance
+  ansible.builtin.systemd:
+    state: restarted 
+    name: mysqld
+
+- name: Set root Password # noqa no-changed-when
+  shell: mysql -e "flush privileges;alter user root@'localhost' identified by '{{ mysql_password }}';"
+
+- name: Drop test database # noqa no-changed-when command-instead-of-shell
+  shell: mysql -u root -p"{{ mysql_password }}" -e "drop database if exists test"
+
+- name: Remove skip grant tables
+  ansible.builtin.lineinfile:
+    path: /etc/my.cnf
+    line: skip-grant-tables
+    state: absent

@@ -1,0 +1,31 @@
+---
+- name: Configure Instances
+  block:
+    - name: Disable binlog checksum
+      ansible.builtin.lineinfile:
+        path: /etc/my.cnf
+        line: binlog-checksum=NONE
+        state: present
+        insertafter: '\[mysqld\]'
+      notify: Disable binlog checksum
+
+    - name: Disable binlog checksum in running instances
+      meta: flush_handlers
+    - name: Create InnoDB Cluster admin # noqa command-instead-of-shell
+      block:
+        - name: Copy SQL script to hosts
+          ansible.builtin.template:
+            src: create_innodb_admin.sql.j2
+            dest: /tmp/create_innodb_admin.sql
+            owner: mysql 
+            group: mysql
+            mode: '0600'
+        - name: Execute script
+          ansible.builtin.shell: mysql --user=root --password="{{ mysql_root_password }}" mysql < /tmp/create_innodb_admin.sql
+        - name: Delete script
+          ansible.builtin.file:
+            path: /tmp/create_innodb_admin.sql
+            state: absent
+            
+
+# - name: Create InnoDB Cluster

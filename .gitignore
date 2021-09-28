@@ -3,3 +3,6 @@ roles/*/vars/*
 sample.yaml
 roles/*/defaults/main.yaml
 ./*.yaml
+roles/linux-update-dns-bind/files/bnh.vn.db
+sample.yaml
+sample.yaml

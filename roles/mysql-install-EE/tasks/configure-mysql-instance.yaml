@@ -1,0 +1,38 @@
+---
+- name: create directories
+  block:
+    - name: datadir 
+      ansible.builtin.file:
+        path: "{{ datadir }}"
+        state: directory
+        owner: mysql
+        group: mysql
+        mode: '0751'
+    - name: binlog dir 
+      ansible.builtin.file:
+        path: "{{ binlog_dir }}"
+        state: directory
+        owner: mysql
+        group: mysql
+        mode: '0751'
+    - name: logging dir 
+      ansible.builtin.file:
+        path: "{{ error_log | dirname }}"
+        state: directory
+        owner: mysql
+        group: mysql 
+        mode: '0751'
+      when: not error_log | regex_search("^\/var\/(log|lib)\/[a-zA-Z]+\.[a-zA-Z]*$")
+
+- name: get configuration variables 
+  block: 
+    - name: buffer pool size 
+      shell: free -m |grep Mem| awk '{print $2}'
+      register: mem_total
+- name: Set MySQL Configurations 
+  ansible.builtin.template:
+    src: my.cnf.j2
+    dest: /etc/my.cnf
+    owner: mysql 
+    group: mysql
+    mode: '0600'
