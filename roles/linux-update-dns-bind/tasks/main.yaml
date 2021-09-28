@@ -8,13 +8,13 @@
   ansible.builtin.copy:
     src: "{{ db_file }}"
     dest: "/var/named/{{ db_file }}"
-    mode: "0751"
+    mode: "0644"
 
 - name: update serial 
   ansible.builtin.lineinfile:
     path: "/var/named/{{ db_file }}"
-    regexp: '^(\s+)[0-9]+(\s*; Serial)'
-    line: "{{ ((remotedbfile['content'] | b64decode | regex_findall('([0-9]+).+; Serial')|first)|int) +1 }}"
+    regexp: ' *([0-9]+).*; Serial'
+    line: "   {{ ((remotedbfile['content'] | b64decode | regex_findall(' *([0-9]+).*; Serial') |first) |int) +1 }} ; Serial"
 
 - name: restart named service
   ansible.builtin.systemd:

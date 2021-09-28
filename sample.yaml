@@ -1,6 +1,11 @@
 ---
+<<<<<<< Updated upstream
 - hosts: cloudera
   gather_facts: yes
+=======
+- hosts: repo_server
+  gather_facts: no
+>>>>>>> Stashed changes
   tasks:
     # - debug: msg="{{ hostvars[inventory_hostname]['ansible_nodename'] }}"
     - name: tests
