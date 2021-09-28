@@ -1,0 +1,23 @@
+---
+- name: get remote file serial 
+  ansible.builtin.slurp:
+    src: "/var/named/{{ db_file }}"
+  register: remotedbfile
+
+- name: copy db file
+  ansible.builtin.copy:
+    src: "{{ db_file }}"
+    dest: "/var/named/{{ db_file }}"
+    mode: "0751"
+
+- name: update serial 
+  ansible.builtin.lineinfile:
+    path: "/var/named/{{ db_file }}"
+    regexp: '^(\s+)[0-9]+(\s*; Serial)'
+    line: "{{ ((remotedbfile['content'] | b64decode | regex_findall('([0-9]+).+; Serial')|first)|int) +1 }}"
+
+- name: restart named service
+  ansible.builtin.systemd:
+    name: named 
+    state: restarted
+    enabled: yes 
