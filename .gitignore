@@ -7,3 +7,4 @@ roles/linux-update-dns-bind/files/bnh.vn.db
 sample.yaml
 sample.yaml
 install-docker.yaml
+sample.yaml

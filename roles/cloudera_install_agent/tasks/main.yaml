@@ -6,7 +6,7 @@
       - krb5-libs
     state: present
 - name: Setup CDP Repository 
-  ansible.bultin.yum_repository:
+  ansible.builtin.yum_repository:
     name: cloudera-cdp
     description: Cloudera Data Platform YUM Repository 
     baseurl: "{{ cdp_repo_url }}"
@@ -23,7 +23,7 @@
     regexp: '^server_host=localhost.*$'
     backrefs: yes 
 - name: start agent
-  ansible.bultin.systemd:
+  ansible.builtin.systemd:
     name: cloudera-scm-agent
     state: started
     enabled: yes 

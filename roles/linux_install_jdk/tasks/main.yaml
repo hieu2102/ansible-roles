@@ -1,0 +1,9 @@
+--- 
+- name: unzip download file
+  ansible.builtin.unarchive:
+    src: "{{ download_dest }}"
+    dest: /tmp/
+    remote_src: yes 
+    owner: root
+    group: root
+    mode: 0755

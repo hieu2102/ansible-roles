@@ -1,0 +1,30 @@
+---
+- name: copy response file 
+  ansible.builtin.template:
+    src: weblogic.rsp.j2
+    dest: /tmp/webloig.rsp
+    mode: 0644
+    owner: "{{ wls_user }}"
+    group: "{{ wls_group }}"
+- name: download java SE 8 
+  include_role: oracle-MOS-download
+  vars: 
+    sso_user: "{{ sso_user }}"
+    sso_passwd: "{{ sso_passwd }}"
+    sso_cookie: "{{ sso_cookie }}"
+    download_url: "{{ download_url }}"
+    download_dest: "{{ download_dest }}"
+- name: download weblogic infrastructure
+  include_role: oracle-MOS-download
+  vars:
+    sso_user: "{{ sso_user }}"
+    sso_passwd: "{{ sso_passwd }}"
+    sso_cookie: "{{ sso_cookie }}"
+    download_url: "{{ download_url }}"
+    download_dest: "{{ download_dest }}"
+
+- name: install java SE 8
+  ansible.builtin.yum:
+    name: 
+      - "{{ java_se_8_download_path }}"
+    state: present
