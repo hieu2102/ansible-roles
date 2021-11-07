@@ -11,3 +11,4 @@ install-docker.yaml
 sample.yaml
 add_lvm.yaml
 *.db
+roles/cloudera_install_agent/files/hosts

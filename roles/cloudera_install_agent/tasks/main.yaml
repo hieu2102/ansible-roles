@@ -1,4 +1,9 @@
 ---
+- name: update hosts file 
+  ansible.builtin.copy:
+    src: hosts
+    dest: /etc/hosts
+    mode: '0644'
 - name: Install Kerberos
   ansible.builtin.yum:
     name: 
