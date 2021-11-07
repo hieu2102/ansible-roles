@@ -21,8 +21,8 @@
   lvol:
       vg: "{{ vg_name }}"
       lv:  "{{ lv_name }}"
-      size: "{{ volume_size -1 | int }}g"
-      force: yes
+      size: 100%FREE
+      force: no
 
 - name: Create mount point
   file:

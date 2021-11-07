@@ -8,3 +8,6 @@ sample.yaml
 sample.yaml
 install-docker.yaml
 sample.yaml
+add_lvm.yaml
+roles/linux_update_dns_bind/files/bnh.vn.db
+*.db

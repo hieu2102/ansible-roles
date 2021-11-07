@@ -1,0 +1,34 @@
+############################################################
+##      Oracle OIM plugin registration
+##
+## This file contains properties used
+## for the plugin registration utility for registering
+## and unregistering plugins
+##
+## Depending on your configuration you may have to change
+## these properties.
+##
+
+############################################################
+## The installation directory for WLS e.g. MW_HOME/wlserver
+############################################################
+wls.home=@wls_home
+
+############################################################
+# The OIM server directory for OIM. For example: MW_HOME/idm/server
+############################################################
+oim.home=@oim_home
+
+############################################################
+#login file name with path for WLS
+############################################################
+login.config=${oim.home}/config/authwl.conf
+
+############################################################
+# Represents the directory where Oracle Fusion Middleware is installed.
+############################################################
+mw.home={{ mw_home }}
+OIM.Username={{ xelsysadm_username }}
+ServerURL=t3://{{ oim_hostname }}:{{ oim_port }}
+PluginZipToRegister={{ plugin_zip }}
+OIM.UserPassword={{ xelsysadm_passwd }}
