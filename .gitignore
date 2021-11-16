@@ -12,3 +12,7 @@ sample.yaml
 add_lvm.yaml
 *.db
 roles/cloudera_install_agent/files/hosts
+extend-lvm.yaml
+cloudera-add-host.yaml
+update-dns.yaml
+roles/cloudera_install_agent/files/krb5.conf

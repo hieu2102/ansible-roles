@@ -1,0 +1,9 @@
+---
+- name: create new pv # noqa command-instead-of-shell no-changed-when
+  ansible.builtin.shell: "pvcreate {{ pv }}"
+- name: extend vg # noqa command-instead-of-shell no-changed-when
+  ansible.builtin.shell: "vgextend {{ vg }} {{ pv }}"
+- name: extend lvm  # noqa command-instead-of-shell no-changed-when
+  ansible.builtin.shell: "lvm lvextend -l +100%FREE  /dev/{{ vg }}/{{ lv }}"
+- name: resize file system  # noqa command-instead-of-shell no-changed-when
+  ansible.builtin.shell: "xfs_growfs /dev/{{ vg }}/{{ lv }}"

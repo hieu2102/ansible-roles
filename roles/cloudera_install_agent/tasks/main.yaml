@@ -4,12 +4,18 @@
     src: hosts
     dest: /etc/hosts
     mode: '0644'
+
 - name: Install Kerberos
   ansible.builtin.yum:
     name: 
       - krb5-workstation
       - krb5-libs
     state: present
+- name: Setup Kerberos
+  ansible.builtin.copy:
+    src: krb5.conf
+    dest: /etc/krb5.conf
+    mode: '0644'
 - name: Setup CDP Repository 
   ansible.builtin.yum_repository:
     name: cloudera-cdp
@@ -27,8 +33,13 @@
     line: "server_host={{ cdp_host }}"
     regexp: '^server_host=localhost.*$'
     backrefs: yes 
-- name: start agent
-  ansible.builtin.systemd:
-    name: cloudera-scm-agent
-    state: started
-    enabled: yes 
+- name: create log cleaning cronjob 
+  ansible.builtin.cron:
+    name: "Hadoop Services log cleaning"
+    minute: "30"
+    job: "find /var/log ! -user root -mtime +3 -type f | /usr/bin/xargs rm -f"
+# - name: start agent
+#   ansible.builtin.systemd:
+#     name: cloudera-scm-agent
+#     state: started
+#     enabled: yes 
