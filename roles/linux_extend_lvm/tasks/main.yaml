@@ -1,9 +1,17 @@
 ---
+- name: check if disk is added # noqa command-instead-of-shell risky-shell-pipe
+  ansible.builtin.shell: "pvscan |grep {{ pv }}"
+  register: pvscan_result
+  changed_when: False
 - name: create new pv # noqa command-instead-of-shell no-changed-when
   ansible.builtin.shell: "pvcreate {{ pv }}"
+  when: pvscan_result.stdout|length == 0
 - name: extend vg # noqa command-instead-of-shell no-changed-when
   ansible.builtin.shell: "vgextend {{ vg }} {{ pv }}"
+  when: pvscan_result.stdout|length == 0
 - name: extend lvm  # noqa command-instead-of-shell no-changed-when
   ansible.builtin.shell: "lvm lvextend -l +100%FREE  /dev/{{ vg }}/{{ lv }}"
+  when: pvscan_result.stdout|length == 0
 - name: resize file system  # noqa command-instead-of-shell no-changed-when
   ansible.builtin.shell: "xfs_growfs /dev/{{ vg }}/{{ lv }}"
+  when: pvscan_result.stdout|length == 0
