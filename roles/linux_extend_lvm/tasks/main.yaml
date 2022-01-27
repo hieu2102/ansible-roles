@@ -1,6 +1,7 @@
 ---
 - name: check if disk is added # noqa command-instead-of-shell risky-shell-pipe
   ansible.builtin.shell: "pvscan |grep {{ pv }}"
+  failed_when: False
   register: pvscan_result
   changed_when: False
 - name: create new pv # noqa command-instead-of-shell no-changed-when

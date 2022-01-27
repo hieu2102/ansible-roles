@@ -1,16 +1,26 @@
 ---
-- name: get session cookie
-  ansible.builtin.stat:
-    path: "{{ sso_cookie }}"
-  register: cookie_status
-- name: login My Oracle Support # noqa command-instead-of-shell command-instead-of-module
-  shell: wget --secure-protocol=auto --save-cookies="{{ sso_cookie }}" --keep-session-cookies  --http-user "{{ sso_user }}" --password "{{ sso_passwd }}" "https://updates.oracle.com/Orion/Services/download" -O /dev/null
-  changed_when: cookie_status.stat.exists == False or (ansible_date_time.epoch|float - cookie_status.stat.mtime) > 10 * 60 
-
 - name: Check Download File Exists
   ansible.builtin.stat:
     path: "{{ download_dest }}"
   register: download_file_status
+
+# - name: debug 
+#   ansible.builtin.debug:
+#     msg: "{{ download_file_status.stat.checksum == download_file_checksum }} "
+#   when: not download_file_status.stat.exists 
+
+- name: get session cookie
+  ansible.builtin.stat:
+    path: "{{ sso_cookie }}"
+  register: cookie_status
+  # when: not download_file_status.stat.exists 
+
+- name: login My Oracle Support # noqa command-instead-of-shell command-instead-of-module
+  shell: "wget --secure-protocol=auto --save-cookies={{ sso_cookie }} --keep-session-cookies  --http-user {{ sso_user }} --password {{ sso_passwd }} https://updates.oracle.com/Orion/Services/download -O /dev/null"
+  changed_when: cookie_status.stat.exists == False
+  # when: not download_file_status.stat.exists 
+
 - name: Download File # noqa command-instead-of-shell command-instead-of-module
-  shell: wget  --load-cookies="{{ sso_cookie }}" "{{ download_url }}" -O "{{ download_dest }}"
+  shell: wget --load-cookies="{{ sso_cookie }}" "{{ download_url }}" -O "{{ download_dest }}"
   changed_when: download_file_status.stat.exists == False 
+  # when: not download_file_status.stat.exists 

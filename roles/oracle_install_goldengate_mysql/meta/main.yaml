@@ -1,0 +1,5 @@
+---
+# dependencies:
+#   - role: "oracle_MOS_download"
+#     vars:
+#       download_dest: /tmp/ggs_mysql.zip

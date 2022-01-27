@@ -1,0 +1,7 @@
+---
+- hosts: oem
+  gather_facts: no
+  tasks:
+    - name: tests
+      include_role:
+        name: oracle_install_goldengate_mysql
