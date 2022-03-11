@@ -1,14 +1,26 @@
 ---
-- name: update hosts file 
-  ansible.builtin.copy:
-    src: hosts
-    dest: /etc/hosts
-    mode: '0644'
+# - name: update hosts file
+#   ansible.builtin.copy:
+#     src: hosts
+#     dest: /etc/hosts
+#     mode: '0644'
+
+- name: resolve hostname using DNS
+  ansible.builtin.replace:
+    path: /etc/nsswitch.conf
+    regexp: "^hosts:.+"
+    replace: "hosts: dns files"
+    backup: yes
+
+- name: set DNS server
+  ansible.builtin.template:
+    src: resolv.conf.j2
+    dest: /etc/resolv.conf
 
 - name: Disable swap for current session
   command: swapoff -a
   become: true
-  changed_when: False 
+  changed_when: False
 
 - name: Disable swap permanently, persist reboots
   replace:
@@ -17,41 +29,55 @@
     replace: '#\1\2\3swap\4'
     backup: yes
 
+- name: Setup CentOS Repository
+  ansible.builtin.yum_repository:
+    name: centos7
+    description: centos 7 repo 
+    baseurl: http://13.231.175.254/centos/7/os/x86_64
+    enabled: yes 
+    gpgcheck: no 
+
 - name: Install Kerberos
   ansible.builtin.yum:
-    name: 
+    name:
       - krb5-workstation
       - krb5-libs
     state: present
+
 - name: Setup Kerberos
   ansible.builtin.copy:
     src: krb5.conf
     dest: /etc/krb5.conf
-    mode: '0644'
-- name: Setup CDP Repository 
+    mode: "0644"
+
+- name: Setup CDP Repository
   ansible.builtin.yum_repository:
     name: cloudera-cdp
-    description: Cloudera Data Platform YUM Repository 
+    description: Cloudera Data Platform YUM Repository
     baseurl: "{{ cdp_repo_url }}"
-    enabled: yes 
-    gpgcheck: no 
+    enabled: yes
+    gpgcheck: no
+
 - name: Install CDP agent
   ansible.builtin.yum:
     name: cloudera-manager-agent
     state: present
-- name: configure agent 
+
+- name: configure agent
   ansible.builtin.lineinfile:
     path: /etc/cloudera-scm-agent/config.ini
     line: "server_host={{ cdp_host }}"
-    regexp: '^server_host=localhost.*$'
-    backrefs: yes 
-- name: create log cleaning cronjob 
+    regexp: "^server_host=localhost.*$"
+    backrefs: yes
+
+- name: create log cleaning cronjob
   ansible.builtin.cron:
     name: "Hadoop Services log cleaning"
     minute: "30"
     job: "find /var/log ! -user root -mtime +3 -type f | /usr/bin/xargs rm -f"
-# - name: start agent
-#   ansible.builtin.systemd:
-#     name: cloudera-scm-agent
-#     state: started
-#     enabled: yes 
+  
+- name: start agent
+  ansible.builtin.systemd:
+    name: cloudera-scm-agent
+    state: started
+    enabled: yes
