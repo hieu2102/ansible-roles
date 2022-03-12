@@ -1,11 +1,11 @@
 ---
-# - name: update hosts file
-#   ansible.builtin.copy:
-#     src: hosts
-#     dest: /etc/hosts
-#     mode: '0644'
+- name: update hosts file
+  ansible.builtin.lineinfile:
+    path: /etc/hosts 
+    insertafter: '\slocalhost'
+    line: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }} {{ inventory_hostname }}"
 
-- name: resolve hostname using DNS
+- name: Set Default hostname resolution to DNS
   ansible.builtin.replace:
     path: /etc/nsswitch.conf
     regexp: "^hosts:.+"
@@ -32,10 +32,10 @@
 - name: Setup CentOS Repository
   ansible.builtin.yum_repository:
     name: centos7
-    description: centos 7 repo 
+    description: centos 7 repo
     baseurl: http://13.231.175.254/centos/7/os/x86_64
-    enabled: yes 
-    gpgcheck: no 
+    enabled: yes
+    gpgcheck: no
 
 - name: Install Kerberos
   ansible.builtin.yum:
@@ -45,8 +45,8 @@
     state: present
 
 - name: Setup Kerberos
-  ansible.builtin.copy:
-    src: krb5.conf
+  ansible.builtin.template:
+    src: krb5.conf.j2
     dest: /etc/krb5.conf
     mode: "0644"
 
@@ -63,7 +63,7 @@
     name: cloudera-manager-agent
     state: present
 
-- name: configure agent
+- name: Configure agent
   ansible.builtin.lineinfile:
     path: /etc/cloudera-scm-agent/config.ini
     line: "server_host={{ cdp_host }}"
@@ -75,9 +75,3 @@
     name: "Hadoop Services log cleaning"
     minute: "30"
     job: "find /var/log ! -user root -mtime +3 -type f | /usr/bin/xargs rm -f"
-  
-- name: start agent
-  ansible.builtin.systemd:
-    name: cloudera-scm-agent
-    state: started
-    enabled: yes

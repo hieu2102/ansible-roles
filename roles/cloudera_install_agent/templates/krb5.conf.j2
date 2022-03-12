@@ -1,0 +1,18 @@
+[libdefaults]
+default_realm = {{ krb_domain }} 
+dns_lookup_kdc = false
+dns_lookup_realm = false
+ticket_lifetime = 8640000
+renew_lifetime = 8640000
+forwardable = true
+default_tgs_enctypes = rc4-hmac
+default_tkt_enctypes = rc4-hmac
+permitted_enctypes = rc4-hmac
+udp_preference_limit = 1
+kdc_timeout = 120000
+[realms]
+{{ krb_domain }}  = {
+kdc = {{ kadmin_host }} 
+admin_server = {{ kadmin_host }} 
+}
+[domain_realm]
