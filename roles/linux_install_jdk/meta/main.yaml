@@ -1,6 +1,3 @@
 ---
 dependencies:
-  - role: oracle-MOS-download
-    vars:
-      download_url: "{{ download_url }}"
-      download_dest: "{{ download_dest }}"
+  - role: oracle_MOS_download

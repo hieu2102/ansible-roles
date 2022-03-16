@@ -1,0 +1,9 @@
+---
+- name: install docker
+  hosts: oms
+  gather_facts: no 
+
+  tasks: 
+    - name: install jdk 
+      include_role:
+        name: linux_install_jdk
