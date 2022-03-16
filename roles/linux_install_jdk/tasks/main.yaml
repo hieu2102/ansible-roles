@@ -7,3 +7,7 @@
     owner: root
     group: root
     mode: 0755
+- name: install jdk
+  ansible.builtin.yum:
+    name: /tmp/jdk-8u301-linux-x64.rpm
+    state: present
