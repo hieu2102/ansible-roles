@@ -11,3 +11,9 @@
   ansible.builtin.yum:
     name: /tmp/jdk-8u301-linux-x64.rpm
     state: present
+- name: set default JAVA_HOME
+  ansible.builtin.blockinfile:
+    path: /etc/bashrc
+    block: |
+      export JAVA_HOME=/usr/java/latest
+      export PATH=$JAVA_HOME/bin:$PATH

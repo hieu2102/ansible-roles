@@ -1,0 +1,67 @@
+---
+- name: setup YUM repo
+  ansible.builtin.yum_repository:
+    name: "{{ repo_name }}"
+    description: "{{ repo_name }}"
+    baseurl: "{{ repo_url }}"
+    enabled: yes
+    gpgcheck: no
+
+- name: install dependencies
+  ansible.builtin.yum:
+    name:
+      - binutils*
+      - compat-libcap*
+      - compat-libstdc*
+      - libgcc*
+      - libstdc*
+      - libstdc*devel*
+      - sysstat*
+      - gcc*
+      - ksh*
+      - make*
+      - glibc*
+      - glibc-devel*
+      - libaio*
+      - libaio-devel*
+    state: present
+- name: create group oinstall
+  ansible.builtin.group:
+    name: "{{ oinstall_group }}"
+    state: present
+- name: create user oracle
+  ansible.builtin.user:
+    name: "{{ oracle_user }}"
+    group: "{{ oinstall_group }}"
+    shell: /bin/bash
+    password: "{{ oracle_user_password }}"
+    state: present
+- name: create directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ oracle_user }}"
+    group: "{{ oinstall_group }}"
+    mode: "0755"
+  loop:
+    - "{{ oracle_base }}"
+    - "{{ oracle_home }}"
+    - "{{ ora_inventory }}"
+- name: create oraInst.loc
+  ansible.builtin.template:
+    src: oraInst.loc.j2
+    dest: "/home/{{ oracle_user }}/oraInst.loc"
+    owner: "{{ oracle_user }}"
+    group: "{{ oinstall_group }}"
+    mode: "0755"
+- name: install FMW
+  ansible.builtin.shell: "su - {{ oracle_user }} -c 'nohup java -jar /tmp/fmw_12.2.1.4.0_infrastructure.jar -silent -responseFile /tmp/fmw.rsp -invPtrLoc /home/{{ oracle_user }}/oraInst.loc &'"
+- name: set environment variables
+  ansible.builtin.blockinfile:
+    path: "/home/{{ oracle_user }}/.bash_profile"
+    block: |
+      export ORA_INVENTORY={{ ora_inventory }}
+      export ORACLE_BASE={{ oracle_base }}
+      export ORACLE_HOME={{ oracle_home }}
+      export MW_HOME=$ORACLE_HOME
+      export PATH=$PATH:$ORACLE_HOME/bin
