@@ -1,6 +1,6 @@
 ---
 - name: install docker
-  hosts: oms
+  hosts: oem
   gather_facts: no 
 
   tasks: 

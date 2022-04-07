@@ -16,3 +16,5 @@ extend-lvm.yaml
 cloudera-add-host.yaml
 update-dns.yaml
 roles/cloudera_install_agent/files/krb5.conf
+roles/.DS_Store
+roles/**/.DS_Store

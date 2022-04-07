@@ -1,4 +1,13 @@
 ---
+- name: add admin group 
+  ansible.builtin.group:
+    name: admin 
+    state: present 
+- name: add admin user 
+  ansible.builtin.user:
+    name: admin 
+    group: admin 
+    state: present
 - name: update hosts file
   ansible.builtin.lineinfile:
     path: /etc/hosts 
@@ -16,6 +25,7 @@
   ansible.builtin.template:
     src: resolv.conf.j2
     dest: /etc/resolv.conf
+    mode: '0644'
 
 - name: Disable swap for current session
   command: swapoff -a
@@ -75,3 +85,9 @@
     name: "Hadoop Services log cleaning"
     minute: "30"
     job: "find /var/log ! -user root -mtime +3 -type f | /usr/bin/xargs rm -f"
+
+- name: start chronyd 
+  ansible.builtin.systemd: 
+    name: chronyd 
+    state: started
+    enabled: yes 

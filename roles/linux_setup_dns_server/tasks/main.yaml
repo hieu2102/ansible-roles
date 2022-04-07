@@ -1,0 +1,25 @@
+---
+- name: install DNS bind 
+  ansible.builtin.yum:
+    name: 
+      - bind
+    state: present
+
+- name: transfer config file 
+  ansible.builtin.copy:
+    src: "{{ file }}"
+    dest: "/etc/named.conf"
+    mode: "0644"
+
+# TODO: loop over db files 
+- name: transfer db files 
+  ansible.builtin.copy:
+    src: "{{ db_file }}"
+    dest: "/var/named/{{ db_file }}"
+    mode: "0644"
+
+- name: start named DNS service 
+  ansible.builtin.systemd:
+    name: named
+    state: restarted
+    enabled: yes 
