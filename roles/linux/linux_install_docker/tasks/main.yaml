@@ -1,20 +1,20 @@
 ---
-- name: Install Dependencies
-  ansible.builtin.yum:
-    name: 
-      - "{{ fuse_overlayfs }}"
-      - "{{ lirp4netns }}"
-      - "{{ fuse3_libs }}"
-      - "{{ container_selinux }}"
-      - "yum-utils"
-    state: present 
 - name: Setup Repository 
-  ansible.builtin.yum_repository:
-    name: docker 
-    description: Docker Stable Version 
-    baseurl: https://download.docker.com/linux/centos/7/x86_64/stable/
-    enabled: yes
-    gpgcheck: no 
+  block: 
+    - name: CentOS EPEL Repository 
+      ansible.builtin.yum_repository:
+        name: centos_epel
+        description: CentOS EPEL
+        baseurl: "http://mirror.centos.org/centos/{{ ansible_distribution_version | regex_replace('\\..+', '') }}/extras/$basearch"
+        enabled: yes 
+        gpgcheck: no 
+    - name: Docker Repository 
+      ansible.builtin.yum_repository:
+        name: docker 
+        description: Docker Stable Version 
+        baseurl: https://download.docker.com/linux/centos/$releasever/$basearch/stable/
+        enabled: yes
+        gpgcheck: no 
 - name: Install Docker 
   ansible.builtin.yum:
     name: 
