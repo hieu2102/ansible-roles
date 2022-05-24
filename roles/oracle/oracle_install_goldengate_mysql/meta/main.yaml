@@ -1,5 +1,9 @@
 ---
-# dependencies:
-#   - role: "oracle_MOS_download"
-#     vars:
-#       download_dest: /tmp/ggs_mysql.zip
+galaxy_info:
+  role_name: oracle_install_ogg_mysql
+  author: hieund2102@gmail.com
+
+dependencies:
+  - role: download_from_my_oracle_support
+    vars:
+      download_dest: /tmp/ggs_mysql.zip

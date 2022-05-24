@@ -1,3 +1,6 @@
 ---
+galaxy_info:
+  role_name: linux_install_jdk
+  author: hieund2102@gmail.com
 dependencies:
-  - role: oracle_MOS_download
+  - role: download_from_my_oracle_support

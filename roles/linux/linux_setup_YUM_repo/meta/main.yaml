@@ -1,0 +1,4 @@
+---
+galaxy_info:
+  role_name: configure_yum_repo
+  author: hieund2102@gmail.com

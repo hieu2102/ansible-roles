@@ -1,0 +1,4 @@
+---
+galaxy_info:
+  role_name: setup_docker_registry
+  author: hieund2102@gmail.com
