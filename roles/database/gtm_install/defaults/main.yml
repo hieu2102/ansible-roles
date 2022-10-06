@@ -1,0 +1,12 @@
+---
+# defaults file for gtm_install
+DOWNLOAD_URL: "https://master.dl.sourceforge.net/project/fis-gtm/GT.M-amd64-Linux/V7.0-004/gtm_V70004_linux_x8664_pro.tar.gz"
+DOWNLOAD_DEST: /tmp
+OWNER: root
+GROUP: root
+RESTRICT_EXECUTION: n
+gtm_dist: /opt/gtm
+SUPPORT_UTF8: n
+USE_NON_DEFAULT_ICU: n
+CASE_INSENSITIVE_M_ROUTINES: y
+KEEP_OBJECT_FILES: n

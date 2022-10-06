@@ -1,0 +1,31 @@
+---
+# tasks file for gtm_install
+- name: Create Download Dir
+  ansible.builtin.file:
+    path: "{{ DOWNLOAD_DEST }}/gtm/download"
+    state: directory
+
+- name: Create Installation Temp Dir
+  ansible.builtin.file:
+    path: "{{ DOWNLOAD_DEST }}/gtm/install"
+    state: directory
+
+- name: Download Installer
+  ansible.builtin.get_url:
+    url: "{{ DOWNLOAD_URL }}"
+    dest: "{{ DOWNLOAD_DEST }}/gtm/download/gtm_installer.tar.gz"
+    validate_certs: no
+
+- name: Extract Installer
+  ansible.builtin.unarchive:
+    remote_src: yes
+    src: "{{ DOWNLOAD_DEST }}/gtm/download/gtm_installer.tar.gz"
+    dest: "{{ DOWNLOAD_DEST }}/gtm/install/"
+
+- name: Create Installer Response File
+  ansible.builtin.template:
+    src: install_options.txt.j2
+    dest: "{{ DOWNLOAD_DEST }}/gtm/install.rsp"
+
+- name: Install GT.M
+  shell: "cd {{ DOWNLOAD_DEST }}/gtm/install; cat {{ DOWNLOAD_DEST }}/gtm/install.rsp | {{ DOWNLOAD_DEST }}/gtm/install/configure"
