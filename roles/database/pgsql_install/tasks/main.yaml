@@ -1,0 +1,22 @@
+---
+- name: install dependency
+  ansible.builtin.yum:
+    name: https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+    state: present
+    validate_certs: no
+
+- name: install database
+  ansible.builtin.yum:
+    name: 
+      - "postgresql{{ version }}-server"
+      - postgresql-jdbc*
+    state: present
+
+- name: init database
+  ansible.builtin.shell: "/usr/pgsql-{{ version }}/bin/postgresql-14-setup initdb"
+
+- name: start service
+  ansible.builtin.systemd:
+    name: postgresql-{{ version }}
+    state: started
+    enabled: yes

@@ -5,7 +5,7 @@
       ansible.builtin.yum_repository:
         name: centos_epel
         description: CentOS EPEL
-        baseurl: "http://mirror.centos.org/centos/{{ ansible_distribution_version | regex_replace('\\..+', '') }}/extras/$basearch"
+        baseurl: "http://mirror.centos.org/centos/{{ ansible_distribution_version | regex_replace('\\..+', '') }}/extras/$basearch/os"
         enabled: yes 
         gpgcheck: no 
     - name: Docker Repository 

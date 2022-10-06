@@ -1,4 +1,7 @@
 ---
+- name: set hostname 
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}.{{ domain_name }}"
 - name: add admin group 
   ansible.builtin.group:
     name: admin 
@@ -91,3 +94,9 @@
     name: chronyd 
     state: started
     enabled: yes 
+
+- name: start agent 
+  ansible.builtin.systemd: 
+    name: cloudera-scm-agent 
+    state: started
+    enabled: yes
