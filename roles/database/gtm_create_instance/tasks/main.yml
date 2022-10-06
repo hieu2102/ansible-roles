@@ -1,0 +1,68 @@
+---
+# tasks file for gtm_create_instance
+- name: Create User
+  ansible.builtin.user:
+    name: "{{ USER }}"
+    state: present
+    shell: /bin/bash
+  register: user_data
+
+- name: configure bash profile
+  ansible.builtin.blockinfile:
+    path: "{{ user_data.home }}/.bash_profile"
+    insertafter: EOF
+    block: |
+      export gtm_dist="{{ gtm_dist }}"
+      export gtm_repl_instname="{{ gtm_repl_instname }}"
+      export gtm_repl_instance="{{ gtm_repl_instance }}"
+      export gtmgbldir="{{ gtmgbldir }}"
+      export gtm_principal_editing=EDITING
+      export gtmroutines="{{ DATADIR }}/$gtm_repl_instname $gtm_dist/libgtmutil.so $gtm_dist"
+      export LD_LIBRARY_PATH=/usr/local/lib
+      export gtm_tmp={{ gtm_tmp }}
+      export gtm_log={{ gtm_log }}
+      export PATH=$PATH:$gtm_dist:$HOME/bin
+
+- name: Create Database
+  become: true
+  become_user: "{{ USER }}"
+  block:
+    - name: Create Database Directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ DATADIR }}/{{ gtm_repl_instname }}"
+
+    - name: init
+      ansible.builtin.shell:
+        executable: /bin/bash
+        cmd: |
+          source $HOME/.bash_profile
+          cd {{ DATADIR }}/$gtm_repl_instname
+          mumps -r ^GDE @gdemsr
+
+    - name: Create Database
+      ansible.builtin.shell:
+        executable: /bin/bash
+        cmd: |
+          source $HOME/.bash_profile
+          cd {{ DATADIR }}/$gtm_repl_instname
+          mupip create
+
+- name: Enable Replication
+  become: true
+  become_user: "{{ USER }}"
+  block:
+    - name: Enable Replication
+      ansible.builtin.shell:
+        executable: /bin/bash
+        cmd: |
+          source $HOME/.bash_profile
+          cd {{ DATADIR }}/$gtm_repl_instname
+          mupip set -replication=on -region "*"
+    - name: Create Replication Instance
+      ansible.builtin.shell:
+        executable: /bin/bash
+        cmd: |
+          source $HOME/.bash_profile
+          cd {{ DATADIR }}/$gtm_repl_instname
+          mupip replic -instance_create -noreplace
