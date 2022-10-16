@@ -27,3 +27,8 @@
     name: docker
     state: started
     enabled: yes 
+- name: install docker-compose
+  ansible.builtin.yum:
+    name:
+      - docker-compose-plugin
+    state: present

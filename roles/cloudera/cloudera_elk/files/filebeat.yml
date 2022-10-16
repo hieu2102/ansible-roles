@@ -168,7 +168,7 @@ output.elasticsearch:
   # Authentication credentials - either API key or username/password.
   #api_key: "id:api_key"
   username: "elastic"
-  password: "oracle_4U"
+  password: "changeme"
 
 # ------------------------------ Logstash Output -------------------------------
 #output.logstash:
