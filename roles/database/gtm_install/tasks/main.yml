@@ -1,5 +1,11 @@
 ---
 # tasks file for gtm_install
+- name: Insatll Dependencies 
+  ansible.builtin.yum: 
+    name: 
+      - ncurses-compat-libs
+    state: present
+
 - name: Create Download Dir
   ansible.builtin.file:
     path: "{{ DOWNLOAD_DEST }}/gtm/download"

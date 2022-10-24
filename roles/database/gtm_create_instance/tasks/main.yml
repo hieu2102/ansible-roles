@@ -28,9 +28,11 @@
   become_user: "{{ USER }}"
   block:
     - name: Create Database Directory
+      become: false
       ansible.builtin.file:
         state: directory
         path: "{{ DATADIR }}/{{ gtm_repl_instname }}"
+        owner: "{{ USER }}"
 
     - name: init
       ansible.builtin.shell:
