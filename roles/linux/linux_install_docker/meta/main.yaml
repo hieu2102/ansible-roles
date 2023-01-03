@@ -1,3 +1,5 @@
 galaxy_info:
+  license: none
+  description: install docker on Linux
   role_name: linux_install_docker
   author: hieund2102@gmail.com
