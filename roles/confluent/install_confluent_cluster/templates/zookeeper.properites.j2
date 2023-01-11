@@ -1,0 +1,12 @@
+dataDir=/var/lib/zookeeper
+clientPort=2181
+maxClientCnxns=0
+admin.enableServer=false
+tickTime=2000
+initLimit=5
+syncLimit=2
+server.1=openldap.bnh.vn:2888:3888
+server.2=hieund-kafka-01:2888:3888
+server.3=hieund-kafka-02:2888:3888
+autopurge.snapRetainCount=3
+autopurge.purgeInterval=24

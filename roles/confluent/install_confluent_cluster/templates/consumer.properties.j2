@@ -1,0 +1,17 @@
+bootstrap.servers=localhost:9092
+
+# consumer group id
+group.id=test-consumer-group
+
+auto.offset.reset=earliest
+
+sasl.mechanism=PLAIN
+security.protocol=SASL_PLAINTEXT
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="hieund" password="abcxyz";
+
+sasl.mechanism=OAUTHBEARER
+sasl.login.callback.handler.class=io.confluent.kafka.server.plugins.auth.token.TokenBearerServerLoginCallbackHandler
+sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
+    metadataServerUrls="http://hieund-kafka-02.bnh.vn:8090,http://hieund-kafka-01.bnh.vn:8090,http://openldap.bnh.vn:8090" \
+    username="minhnt" password="abcxyz" \
+    publicKeyPath="/opt/kafka/public.pem";
