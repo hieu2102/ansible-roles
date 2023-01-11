@@ -1,29 +1,30 @@
-- name: Install and Configure Zookeeper
+---
+- name: Install Packages
+  ansible.builtin.yum:
+    name:
+      - confluent-server
+    state: present
+
+- name: Update Config File
   block:
-    - name: Install Packages
-      ansible.builtin.yum:
-        name:
-          - confluent-server
-          - confluent-cli
-        state: present
-    - name: Update Config File
-      block:
-        - name: Transfer Config File
-          ansible.builtin.template:
-            src: zookeeper.properties.j2
-            dest: /etc/kafka/zookeeper.properties
-            mode: "0644"
-        - name: Set Zookeeper Ids
-          ansible.builtin.blockinfile:
-            path: /etc/kafka/zookeeper.properties
-            block: |
-              server.{{ hostvars[item]['ansible_default_ipv4']['address'].split('.')[3] }}={{ hostvars[item]['ansible_default_ipv4']['address'] }}:2888:3888
-            marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item }}"
-          with_items: "{{ groups['zookeeper'] }}"
-    - name: Set myid # noqa command-instead-of-shell no-changed-when
-      ansible.builtin.shell: "echo {{ hostvars[item]['ansible_default_ipv4']['address'].split('.')[3] }} > /var/lib/zookeeper/myid"
-    - name: Start Zookeeper
-      ansible.builtin.systemd:
-        name: confluent-zookeeper
-        state: started
-        enabled: True
+    - name: Transfer Config File
+      ansible.builtin.template:
+        src: zookeeper.properties.j2
+        dest: /etc/kafka/zookeeper.properties
+        mode: "0644"
+    - name: Set Zookeeper Ids
+      ansible.builtin.blockinfile:
+        path: /etc/kafka/zookeeper.properties
+        block: |
+          server.{{ hostvars[item]['ansible_default_ipv4']['address'].split('.')[3] }}={{ hostvars[item]['ansible_default_ipv4']['address'] }}:2888:3888
+        marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item }}"
+      with_items: "{{ groups['zookeeper'] }}"
+
+- name: Set myid # noqa command-instead-of-shell no-changed-when
+  ansible.builtin.shell: "echo {{ hostvars[item]['ansible_default_ipv4']['address'].split('.')[3] }} > /var/lib/zookeeper/myid"
+
+- name: Start Zookeeper
+  ansible.builtin.systemd:
+    name: confluent-zookeeper
+    state: started
+    enabled: true

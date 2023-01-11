@@ -9,16 +9,28 @@
   when: "'zookeeper' in group_names"
   ansible.builtin.include_tasks: install_zk.yaml
 
+- name: Set Variable
+  block:
+    - name: List ZK hosts
+      ansible.builtin.set_fact:
+        zookeeper_url_list: "{{ zookeeper_url_list | default([]) + [hostvars[item]['ansible_default_ipv4']['address'] + ':2181'] }}"
+      loop: "{{ groups['zookeeper'] }}"
+    - name: Export Zookeeper URLs
+      ansible.builtin.set_fact:
+        zookeeper_url: "{{ zookeeper_url_list | join(',') }}"
+
 - name: Install and Configure Broker
   when: "'broker' in group_names"
   ansible.builtin.include_tasks: install_broker.yaml
-
-- name: Configure Broker Authentication
-  ansible.builtin.include_tasks: config_auth.yaml
 
 - name: Install and Configure Control Center
   when: "'control-center' in group_names"
   ansible.builtin.include_tasks: install_control_center.yaml
 
-- name: Configure Metadata Service
+- name: Configure Broker Authentication
+  ansible.builtin.include_tasks: config_auth.yaml
+  when: "config_auth is True"
+
+- name: Configure Metadata Service`
   ansible.builtin.include_tasks: config_mds.yaml
+  when: "config_mds is True"
