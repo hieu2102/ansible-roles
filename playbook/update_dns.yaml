@@ -1,0 +1,9 @@
+---
+- hosts: repo
+  gather_facts: no
+  tasks:
+    - name: update
+      include_role:
+        name: linux/linux_update_dns_bind
+      vars:
+        db_file: bnh.vn.db

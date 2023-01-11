@@ -1,0 +1,12 @@
+---
+- name: create LVM
+  hosts: "{{ group | default('cloudera') }}"
+  gather_facts: yes
+  tasks:
+    - name: extend 
+      include_role: 
+        name: linux/linux_extend_lvm
+      # vars:
+      #   vg_name: cloudera_vg
+      #   lv_name: cloudera_lv
+      #   mount_point: /opt

@@ -1,0 +1,8 @@
+---
+- hosts: gtm
+  gather_facts: yes
+  
+  tasks:
+    - name: install GTM
+      ansible.builtin.include_role: 
+        name: database/gtm_install

@@ -1,0 +1,10 @@
+---
+- name: Create GT.M Instance
+  hosts: gtm
+  gather_facts: true
+  tasks:
+    - name: Install GTM
+      ansible.builtin.include_role:
+        name: database/gtm_create_instance
+      vars:
+        USER: gtmuser

@@ -9,4 +9,3 @@ roles/.DS_Store
 roles/**/.DS_Store
 .vscode/settings.json
 inventory
-playbook

@@ -1,0 +1,9 @@
+---
+- name: test_connection
+  hosts: "{{ group | default('test') }}"
+  gather_facts: true 
+
+  tasks: 
+    - name: test connection 
+      include_role: 
+        name: linux/linux_install_docker

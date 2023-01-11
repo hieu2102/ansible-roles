@@ -1,0 +1,8 @@
+---
+- name: install docker
+  hosts: "{{ group | default('docker') }}"
+  gather_facts: yes
+  tasks:
+    - name: install 
+      include_role: 
+        name: linux/linux_install_docker

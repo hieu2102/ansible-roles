@@ -1,0 +1,8 @@
+---
+- name: install agent
+  hosts: "{{ group | default('cloudera') }}"
+  gather_facts: yes
+  tasks:
+    - name: install
+      include_role: 
+        name: cloudera/cloudera_install_agent

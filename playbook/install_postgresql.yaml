@@ -1,0 +1,9 @@
+---
+- hosts: cloudera-cdp
+  gather_facts: no
+  tasks:
+    - name: install
+      include_role:
+        name: database/pgsql_install
+      vars:
+        db_file: bnh.vn.db
