@@ -1,11 +1,10 @@
 ---
-- name: create LVM
+- name: Create LVM
   hosts: cloudera
-  gather_facts: yes
-  
+  gather_facts: true
   tasks:
-    - name: create LVM
-      include_role: 
+    - name: Create LVM
+      ansible.builtin.include_role:
         name: linux-create-lvm
       vars:
         vg_name: cloudera_vg

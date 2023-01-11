@@ -1,6 +1,7 @@
 ---
-- hosts: oem
-  gather_facts: no
+- name: Uild OEM Plugin
+  hosts: oem
+  gather_facts: false
   vars:
     code_directory: /Users/hieund/work/code/oracle/postgreSQL-emplugin/code
     staging: /Users/hieund/work/code/oracle/postgreSQL-emplugin/stage
@@ -12,70 +13,70 @@
 
   tasks:
     - name: Get project metadata
+      when: inventory_hostname == 'dev'
       block:
-        - name: Get plugin current version
-          shell: cat {{ code_directory }}/plugin.xml|grep PluginVersion|sed "s|[A-Za-z<>=\" /_]||g"
+        - name: Get plugin current version # noqa no-changed-when
+          ansible.builtin.shell: cat {{ code_directory }}/plugin.xml|grep PluginVersion|sed "s|[A-Za-z<>=\" /_]||g"
           register: plugin_version
 
-        - name: Get agent plugin version
-          shell: cat {{ code_directory }}/agent/plugin_registry.xml |grep "PlugIn.*Version" | awk '{print $NF}' | sed "s|[A-Za-z<>=\" /_]||g"
+        - name: Get agent plugin version # noqa no-changed-when
+          ansible.builtin.shell: cat {{ code_directory }}/agent/plugin_registry.xml |grep "PlugIn.*Version" | awk '{print $NF}' | sed "s|[A-Za-z<>=\" /_]||g"
           register: agent_version
 
-        - name: target type metadata version
-          shell: cat {{ code_directory }}/oms/metadata/targetType/{{ item }}.xml | grep "TargetMetadata META_VER" |sed "s|[A-Za-z<>=\" /_]||g"
+        - name: Target type metadata version # noqa no-changed-when
+          ansible.builtin.shell: cat {{ code_directory }}/oms/metadata/targetType/{{ item }}.xml | grep "TargetMetadata META_VER" |sed "s|[A-Za-z<>=\" /_]||g"
           register: targeta_metadata_version
           with_items: "{{ target_types }}"
 
-        - name: default collection metadata version
-          shell: cat {{ code_directory }}/oms/metadata/default_collection/{{ item }}.xml |grep "META_VER" |sed "s|[A-Za-z<>=\" /_]||g"
+        - name: Default collection metadata version # noqa no-changed-when
+          ansible.builtin.shell: cat {{ code_directory }}/oms/metadata/default_collection/{{ item }}.xml |grep "META_VER" |sed "s|[A-Za-z<>=\" /_]||g"
           register: collection_metadata_version
           with_items: "{{ target_types }}"
-      when: inventory_hostname == 'dev'
 
     - name: Build plugin
+      when: inventory_hostname == "dev"
       block:
         - name: Synchronize project content
           block:
             - name: Synchronize plugin version
-              lineinfile:
+              ansible.builtin.file:
                 dest: "{{ code_directory }}/agent/plugin_registry.xml"
                 regexp: '^(.*)"{{ agent_version.stdout }}"(.*)$'
                 line: '\1"{{ plugin_version.stdout }}"\2'
                 backrefs: true
               when: agent_version != plugin_version
 
-        - name: Prep staging directory 
+        - name: Prep staging directory
           block:
-            - name: cleanup last staging
+            - name: Cleanup last staging
               block:
-                - name: list files in staging 
-                  shell: find {{ staging }}  -type f            
+                - name: List files in staging # noqa no-changed-when command-instead-of-shell
+                  ansible.builtin.shell: find {{ staging }}  -type f
                   register: staging_file_list
-                - name: cleanup 
-                  file:
+                - name: Cleanup
+                  ansible.builtin.file:
                     path: "{{ item }}"
                     state: absent
                   with_items: "{{ staging_file_list.stdout_lines }}"
-            - name: populating staging dir
+            - name: Populating staging dir
               block:
-               - name: sync contents
-                 synchronize:
-                  src: "{{ code_directory }}/{{ item }}"
-                  dest: "{{ staging }}" 
-                 with_items:
-                  - agent
-                  - discovery
-                  - plugin.xml
-                  - oms
-               - name: delete MPCUI src
-                 block:
-                  - name: delete
-                    file:
-                      path: "{{ staging }}/oms/metadata/mpcui/"
-                      state: absent
-                  - name: create directory 
-                    file:
-                      path: "{{ staging }}/oms/metadata/mpcui/"
-                      state: directory
-                
-      when: inventory_hostname == "dev"
+                - name: Sync contents
+                  ansible.posix.synchronize:
+                    src: "{{ code_directory }}/{{ item }}"
+                    dest: "{{ staging }}"
+                  with_items:
+                    - agent
+                    - discovery
+                    - plugin.xml
+                    - oms
+                - name: Delete MPCUI src
+                  block:
+                    - name: Delete
+                      ansible.builtin.file:
+                        path: "{{ staging }}/oms/metadata/mpcui/"
+                        state: absent
+                    - name: Create directory
+                      ansible.builtin.file:
+                        path: "{{ staging }}/oms/metadata/mpcui/"
+                        state: directory
+                        mode: '0755'
