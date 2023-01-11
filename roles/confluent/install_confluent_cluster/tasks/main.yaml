@@ -4,30 +4,21 @@
     src: "confluent.repo"
     dest: "/etc/yum.repos.d/confluent.repo"
     mode: "0644"
-- name: Install and Configure Zookeeper
+
+- name: Install Zookeeper
   when: "'zookeeper' in group_names"
-  block:
-    - name: Install Packages
-      ansible.builtin.yum:
-        name:
-          - confluent-server
-          - confluent-cli
-        state: present
-    - name: Update Config File
-    - name: Set myid
-    - name: Start Zookeeper
-      ansible.builtin.systemd:
-        name: confluent-zookeeper
-        state: started
-        enabled: True
+  ansible.builtin.include_tasks: install_zk.yaml
+
 - name: Install and Configure Broker
   when: "'broker' in group_names"
+  ansible.builtin.include_tasks: install_broker.yaml
+
 - name: Configure Broker Authentication
-- name: Configure Metadata Service
-  block:
-    - name: Create Key Pair
-    - name: Update Broker Config
-    - name: Restart Broker
-    - name: Create Admin User for Cluster
+  ansible.builtin.include_tasks: config_auth.yaml
+
 - name: Install and Configure Control Center
   when: "'control-center' in group_names"
+  ansible.builtin.include_tasks: install_control_center.yaml
+
+- name: Configure Metadata Service
+  ansible.builtin.include_tasks: config_mds.yaml

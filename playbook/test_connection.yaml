@@ -4,6 +4,11 @@
   gather_facts: true
 
   tasks:
-    - name: Test connection
-      ansible.builtin.include_role:
-        name: linux/linux_install_docker
+    - name: Append to File with Loop
+      ansible.builtin.blockinfile:
+        create: true
+        path: /opt/zookeeper.properties
+        block: |
+          server.{{ hostvars[item]['ansible_default_ipv4']['address'].split('.')[3] }}={{ hostvars[item]['ansible_default_ipv4']['address'] }}:2888:3888
+        marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item }}"
+      with_items: "{{ groups['test'] }}"

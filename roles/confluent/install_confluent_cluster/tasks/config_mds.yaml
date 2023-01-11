@@ -1,0 +1,6 @@
+---
+- name: Create Key Pair
+- name: Update Broker Config
+- name: Restart Broker
+- name: Create Admin User for Cluster
+- name: Configure Control Center 
