@@ -1,6 +1,6 @@
 ---
 - name: Install Packages
-  ansible.builtin.yum:
+  ansible.builtin.packages:
     name:
       - confluent-server
     state: present

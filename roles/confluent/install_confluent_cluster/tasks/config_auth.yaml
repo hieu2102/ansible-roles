@@ -1,0 +1,7 @@
+---
+- name: Configure LDAP Authentication
+  when: "auth_method == 'LDAP'"
+  ansible.builtin.blockinfile:
+      dest: /etc/kafka/server.properties
+      block: "{{ lookup('template', 'broker_ldap.properties.j2') }}"
+      marker: "{mark} ANSIBLE MANAGED BLOCK FOR BROKER LDAP AUTHENTICATION"

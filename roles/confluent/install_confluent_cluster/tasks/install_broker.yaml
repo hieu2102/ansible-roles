@@ -1,0 +1,24 @@
+---
+- name: Install Packages
+  ansible.builtin.package:
+    name:
+      - confluent-server
+    state: present
+- name: Set Broker ID
+  ansible.builtin.set_fact:
+    broker_id: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'].split('.')[3] }}"
+- name: Update Config File
+  ansible.builtin.template:
+    src: broker.properties.j2
+    dest: /etc/kafka/server.properties
+    mode: "0644"
+
+- name: Configure Broker Authentication
+  ansible.builtin.include_tasks: config_auth.yaml
+
+- name: Start Broker
+  ansible.builtin.systemd:
+    name:
+      - confluent-server
+    state: started
+    enabled: true

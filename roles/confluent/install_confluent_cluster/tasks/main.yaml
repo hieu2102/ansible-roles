@@ -27,10 +27,6 @@
   when: "'control-center' in group_names"
   ansible.builtin.include_tasks: install_control_center.yaml
 
-- name: Configure Broker Authentication
-  ansible.builtin.include_tasks: config_auth.yaml
-  when: "config_auth is True"
-
 - name: Configure Metadata Service`
   ansible.builtin.include_tasks: config_mds.yaml
   when: "config_mds is True"

@@ -1,3 +1,6 @@
+zookeeper.connect={{ zookeeper_url }}
+zookeeper.connection.timeout.ms=18000
+
 broker.id={{ broker_id }}
 num.network.threads=3
 num.io.threads=8
@@ -11,46 +14,9 @@ transaction.state.log.min.isr=1
 log.retention.hours=168
 log.segment.bytes=1073741824
 log.retention.check.interval.ms=300000
-zookeeper.connect={{ zookeeper_url }}
-zookeeper.connection.timeout.ms=18000
+
 group.initial.rebalance.delay.ms=0
 confluent.balancer.enable=true
-
-ldap.group.name.attribute=sAMAccountName
-ldap.group.object.class=group
-ldap.group.member.attribute=member
-ldap.group.member.attribute.pattern=CN=(.*),{{ user_search_base }}
-ldap.group.search.base={{ group_search_base }}
-ldap.user.search.scope=2
-ldap.java.naming.provider.url={{ ldap_url }}
-ldap.java.naming.security.authentication=simple
-ldap.java.naming.security.credentials={{ admin_password }}
-ldap.java.naming.security.principal={{ admin_dn }}
-ldap.user.name.attribute=sAMAccountName
-ldap.user.object.class=organizationalPerson
-ldap.user.search.base={{ user_search_base }}
-
-
-listener.name.sasl_plaintext.sasl.enabled.mechanisms=PLAIN
-listener.name.sasl_plaintext.plain.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="{{ admin }}" password="{{ admin_password }}";
-listener.name.sasl_plaintext.plain.sasl.server.callback.handler.class=io.confluent.security.auth.provider.ldap.LdapAuthenticateCallbackHandler
-
-listeners=SASL_PLAINTEXT://:9092,BROKER://:9091
-inter.broker.listener.name=SASL_PLAINTEXT
-sasl.enabled.mechanisms=PLAIN,OAUTHBEARER
-sasl.mechanism.inter.broker.protocol=PLAIN
-authorizer.class.name=io.confluent.kafka.security.authorizer.ConfluentServerAuthorizer
-confluent.authorizer.access.rule.providers=CONFLUENT,ZK_ACL
-confluent.metadata.server.advertised.listeners=http://{{ hostvars[inventory_hostname] }}:8090
-confluent.metadata.server.authentication.method=BEARER
-confluent.metadata.server.listeners=http://0.0.0.0:8090
-confluent.metadata.server.token.key.path=/opt/kafka/tokenKeypair.pem
-listener.name.broker.oauthbearer.sasl.login.callback.handler.class=io.confluent.kafka.server.plugins.auth.token.TokenBearerServerLoginCallbackHandler
-listener.name.broker.oauthbearer.sasl.server.callback.handler.class=io.confluent.kafka.server.plugins.auth.token.TokenBearerValidatorCallbackHandler
-listener.name.broker.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required publicKeyPath="/opt/kafka/public.pem";
-listener.security.protocol.map=SASL_PLAINTEXT:SASL_PLAINTEXT,BROKER:SASL_PLAINTEXT
-listener.name.broker.sasl.enabled.mechanisms=OAUTHBEARER
-super.users=User:{{ admin }}
 
 offsets.topic.replication.factor=2
 transaction.state.log.replication.factor=2
@@ -61,3 +27,8 @@ confluent.security.event.logger.exporter.kafka.topic.replicas=2
 confluent.balancer.topic.replication.factor=2
 default.replication.factor=2
 min.insync.replicas=1
+
+listeners=SASL_PLAINTEXT://:9092,OAUTH://:9091
+inter.broker.listener.name=SASL_PLAINTEXT
+sasl.enabled.mechanisms=PLAIN,OAUTHBEARER
+listener.security.protocol.map=SASL_PLAINTEXT:SASL_PLAINTEXT,OAUTH:SASL_PLAINTEXT,SASL_SSL:SASL_SSL

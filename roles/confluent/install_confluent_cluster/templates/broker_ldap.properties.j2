@@ -1,0 +1,19 @@
+# LDAP Integration
+ldap.group.name.attribute=sAMAccountName
+ldap.group.object.class=group
+ldap.group.member.attribute=member
+ldap.group.member.attribute.pattern=CN=(.*),{{ user_search_base }}
+ldap.group.search.base={{ group_search_base }}
+ldap.user.search.scope=2
+ldap.java.naming.provider.url={{ ldap_url }}
+ldap.java.naming.security.authentication=simple
+ldap.java.naming.security.credentials={{ admin_password }}
+ldap.java.naming.security.principal={{ admin_dn }}
+ldap.user.name.attribute=sAMAccountName
+ldap.user.object.class=organizationalPerson
+ldap.user.search.base={{ user_search_base }}
+
+# Configure listener named SASL_PLAINTEXT to use LDAP for authentication
+listener.name.sasl_plaintext.sasl.enabled.mechanisms=PLAIN
+listener.name.sasl_plaintext.plain.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="{{ admin }}" password="{{ admin_password }}";
+listener.name.sasl_plaintext.plain.sasl.server.callback.handler.class=io.confluent.security.auth.provider.ldap.LdapAuthenticateCallbackHandler

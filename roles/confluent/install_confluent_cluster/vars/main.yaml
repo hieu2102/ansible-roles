@@ -1,0 +1,7 @@
+---
+admin:
+admin_dn:
+admin_password:
+group_search_base:
+ldap_url:
+user_search_base:

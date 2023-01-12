@@ -1,0 +1,8 @@
+sasl.mechanism.inter.broker.protocol=PLAIN
+authorizer.class.name=io.confluent.kafka.security.authorizer.ConfluentServerAuthorizer
+confluent.authorizer.access.rule.providers=CONFLUENT,ZK_ACL
+confluent.metadata.server.advertised.listeners=http://{{ hostvars[inventory_hostname] }}:8090
+confluent.metadata.server.authentication.method=BEARER
+confluent.metadata.server.listeners=http://0.0.0.0:8090
+confluent.metadata.server.token.key.path=/opt/kafka/tokenKeypair.pem
+super.users=User:{{ admin }}

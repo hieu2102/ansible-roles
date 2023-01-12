@@ -1,5 +1,4 @@
 *.retry 
-roles/*/*/vars/*
 roles/*/*/defaults/main.yaml
 roles/linux/linux-update-dns-bind/files/*.db
 *.db
