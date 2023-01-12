@@ -1,0 +1,12 @@
+---
+- name: Install Confluent Cluster
+  hosts:
+    - broker
+    - zookeeper
+  gather_facts: true
+  tasks:
+    - name: Install confluent
+      ansible.builtin.include_role:
+        name: confluent/install_confluent_cluster
+      vars:
+        - auth_method: "LDAP"

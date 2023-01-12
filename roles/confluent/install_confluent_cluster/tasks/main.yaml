@@ -5,6 +5,12 @@
     dest: "/etc/yum.repos.d/confluent.repo"
     mode: "0644"
 
+- name: Install Dependencies
+  ansible.builtin.package:
+    name:
+      - java-1.8.0-openjdk
+    state: present
+
 - name: Install Zookeeper
   when: "'zookeeper' in group_names"
   ansible.builtin.include_tasks: install_zk.yaml
@@ -29,4 +35,4 @@
 
 - name: Configure Metadata Service`
   ansible.builtin.include_tasks: config_mds.yaml
-  when: "config_mds is True"
+  when: "config_mds == true"

@@ -4,4 +4,4 @@
   ansible.builtin.blockinfile:
       dest: /etc/kafka/server.properties
       block: "{{ lookup('template', 'broker_ldap.properties.j2') }}"
-      marker: "{mark} ANSIBLE MANAGED BLOCK FOR BROKER LDAP AUTHENTICATION"
+      marker: "# {mark} ANSIBLE MANAGED BLOCK FOR BROKER LDAP AUTHENTICATION"

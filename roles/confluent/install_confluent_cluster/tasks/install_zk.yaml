@@ -1,6 +1,6 @@
 ---
 - name: Install Packages
-  ansible.builtin.packages:
+  ansible.builtin.package:
     name:
       - confluent-server
     state: present
@@ -20,9 +20,11 @@
         marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item }}"
       with_items: "{{ groups['zookeeper'] }}"
 
-- name: Set myid # noqa command-instead-of-shell no-changed-when
-  ansible.builtin.shell: "echo {{ hostvars[item]['ansible_default_ipv4']['address'].split('.')[3] }} > /var/lib/zookeeper/myid"
-
+- name: Set myid
+  ansible.builtin.copy:
+    content: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'].split('.')[3] }}"
+    dest: /var/lib/zookeeper/myid
+    mode: "0755"
 - name: Start Zookeeper
   ansible.builtin.systemd:
     name: confluent-zookeeper

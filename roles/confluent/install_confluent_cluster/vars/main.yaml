@@ -1,7 +1,9 @@
 ---
-admin:
-admin_dn:
-admin_password:
-group_search_base:
-ldap_url:
-user_search_base:
+admin: hieund
+admin_dn: "CN=hieund,CN=Users,DC=bnh,DC=vn"
+admin_password: "abcxyz"
+group_search_base: "CN=Users,DC=bnh,DC=vn"
+ldap_url: "ldap://10.10.12.209:389"
+user_search_base: "CN=Users,DC=bnh,DC=vn"
+auth_method: "LDAP"
+config_mds: true

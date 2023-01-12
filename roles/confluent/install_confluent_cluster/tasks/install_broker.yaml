@@ -18,7 +18,6 @@
 
 - name: Start Broker
   ansible.builtin.systemd:
-    name:
-      - confluent-server
+    name: confluent-server
     state: started
     enabled: true
