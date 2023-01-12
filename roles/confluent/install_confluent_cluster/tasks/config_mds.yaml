@@ -1,6 +1,85 @@
 ---
-# - name: Create Key Pair
-# - name: Update Broker Config
-# - name: Restart Broker
-# - name: Create Admin User for Cluster
-# - name: Configure Control Center
+- name: Create Key Pair
+  block:
+    - name: Check if Key Pair had already been created
+      ansible.builtin.stat:
+        path: "{{ mds_public_key }}"
+      register: public_key
+    - name: Create Key Pair
+      when: not public_key.stat.exists
+      delegate_to: localhost
+      block:
+        - name: Create Private Key # noqa no-changed-when
+          ansible.builtin.command: "openssl genrsa -out /tmp/privateKey.pem 2048"
+        - name: Create Public Key # noqa no-changed-when
+          ansible.builtin.command: "openssl rsa -in /tmp/privateKey.pem -outform PEM -pubout -out /tmp/publicKey.pem"
+    - name: Transfer Key Pair to Servers
+      when: not public_key.stat.exists
+      block:
+        - name: Transfer Private Key
+          ansible.builtin.copy:
+            dest: "{{ mds_private_key }}"
+            src: "/tmp/privateKey.pem"
+            mode: "0644"
+        - name: Transfer Public Key
+          ansible.builtin.copy:
+            dest: "{{ mds_public_key }}"
+            src: "/tmp/publicKey.pem"
+            mode: "0644"
+
+- name: Add Metadata Service Config
+  ansible.builtin.blockinfile:
+    dest: /etc/kafka/server.properties
+    block: "{{ lookup('templates', 'broker_mds.properties.j2') }}"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK FOR MDS CONFIGURATION"
+
+- name: Add OAuth SASL Config
+  ansible.builtin.blockinfile:
+    dest: /etc/kafka/server.properties
+    block: "{{ lookup('templates', 'broker_oauth.properties.j2') }}"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK FOR OAUTH AUTHENTICATION"
+
+- name: Update Broker Listeners Config
+  block:
+    - name: Update listeners # noqa no-changed-when
+      ansible.builtin.command: ""
+    - name: Update sasl.enabled.mechanisms # noqa no-changed-when
+      ansible.builtin.command: ""
+    - name: Update listener.security.protocol.map # noqa no-changed-when
+      ansible.builtin.command: ""
+
+- name: Restart Broker
+  ansible.builtin.systemd:
+    name: confluent-server
+    state: restarted
+- name: Set MDS URLs
+  block:
+    - name: List MDS URL # noqa jinja[spacing]
+      ansible.builtin.set_fact:
+        mds_url_list: "{{ mds_url_list | default([]) +  ['http://' + hostvars[item]['ansible_nodename'] + ':8090'] }}"
+    - name: Export MDS URLs
+      ansible.builtin.set_fact:
+        mds_url: "{{ mds_url_list | join(',') }}"
+
+- name: Create Admin User for Cluster
+  delegate_to: "{{ groups.broker | first }}"
+  block:
+    - name: Transfer Script
+      ansible.builtin.copy:
+        src: create_mds_system_admin.sh
+        dest: /tmp/create_mds_system_admin.sh
+        mode: "0775"
+    - name: Execute Script # noqa no-changed-when
+      ansible.builtin.command: "sh /tmp/create_mds_system_admin {{ zookeeper_url }} {{ admin }} {{ admin_password }} {{ mds_url }}"
+
+- name: Update Client Producer Config
+  ansible.builtin.template:
+    src: producer.properties.j2
+    dest: /etc/kafka/producer.properties
+    mode: "0644"
+
+- name: Update Client Consumer Config
+  ansible.builtin.template:
+    src: consumer.properties.j2
+    dest: /etc/kafka/consumer.properties
+    mode: "0644"

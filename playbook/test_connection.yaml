@@ -1,21 +1,10 @@
 ---
 - name: Test_connection
-  hosts: "{{ group | default('test') }}"
+  hosts: localhost
+  connection: local
   gather_facts: true
 
   tasks:
-    # - name: Append to File with Loop
-    #   ansible.builtin.blockinfile:
-    #     create: true
-    #     path: /opt/zookeeper.properties
-    #     block: |
-    #       server.{{ hostvars[item]['ansible_default_ipv4']['address'].split('.')[3] }}={{ hostvars[item]['ansible_default_ipv4']['address'] }}:2888:3888
-    #     marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item }}"
-    #   with_items: "{{ groups['test'] }}"
-    - name: Set Variable
-      ansible.builtin.set_fact:
-        zookeeper_url_list: "{{ zookeeper_url_list | default([]) + [hostvars[item]['ansible_default_ipv4']['address'] + ':2181'] }}"
-      with_items: "{{ groups['test'] }}"
-    - ansible.builtin.set_fact:
-        zookeeper_url: "{{ zookeeper_url_list |join(',')}}"
-    - debug: var=zookeeper_url
+  - name: Get hostname
+    ansible.builtin.debug:
+      msg: "{{ hostvars[inventory_hostname]['ansible_nodename'] }}"

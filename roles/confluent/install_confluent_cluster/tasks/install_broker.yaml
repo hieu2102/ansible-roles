@@ -3,6 +3,7 @@
   ansible.builtin.package:
     name:
       - confluent-server
+      - confluent-cli
     state: present
 - name: Set Broker ID
   ansible.builtin.set_fact:

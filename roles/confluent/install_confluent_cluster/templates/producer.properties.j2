@@ -7,4 +7,4 @@ sasl.login.callback.handler.class=io.confluent.kafka.server.plugins.auth.token.T
 sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
     metadataServerUrls="{{ mds_url }}" \
     username="{{ admin }}" password="{{ admin_password }}" \
-    publicKeyPath="/opt/kafka/public.pem";
+    publicKeyPath="{{ mds_public_key }}";

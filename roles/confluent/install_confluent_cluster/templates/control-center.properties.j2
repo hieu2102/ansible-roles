@@ -12,5 +12,5 @@ confluent.metadata.basic.auth.user.info={{ admin }}:{{ admin_password }}
 confluent.controlcenter.streams.security.protocol=SASL_PLAINTEXT
 confluent.controlcenter.kafka.kcluster.security.protocol=SASL_PLAINTEXT
 confluent.controlcenter.rest.authentication.method=BEARER
-public.key.path=/opt/kafka/public.pem
+public.key.path={{ mds_public_key }}
 confluent.monitoring.interceptor.topic.replication=2
