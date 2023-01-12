@@ -1,0 +1,27 @@
+{
+	"folders": [
+		{
+			"path": "/Users/hieunguyen/work/code/automation/ansible"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.yaml":"ansible"
+			// "**/inventory/*.yaml": "yaml",
+			// "**/**/*.yaml": "ansible",
+			// "**/**/**/**/*.yaml": "ansible"
+		},
+		"files.exclude": {
+			"**/.git": true,
+			"**/.svn": true,
+			"**/.hg": true,
+			"**/CVS": true,
+			"**/.DS_Store": true,
+			"**/Thumbs.db": true,
+			"**/.vscode":true,
+			"ansible.code-workspace":true, 
+			"**/ansible.cfg":true
+		},
+		"editor.tabSize": 2,
+	}
+}
