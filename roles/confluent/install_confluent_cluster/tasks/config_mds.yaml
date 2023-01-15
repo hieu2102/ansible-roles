@@ -1,4 +1,8 @@
 ---
+- name: Start ChronyD
+  ansible.builtin.systemd:
+    name: chronyd
+    enabled: true
 - name: Create Key Pair
   block:
     - name: Check if Key Pair had already been created

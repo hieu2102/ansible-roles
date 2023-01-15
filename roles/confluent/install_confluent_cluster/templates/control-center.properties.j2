@@ -1,9 +1,7 @@
-bootstrap.servers={{ broker_url }}
+bootstrap.servers={{ broker_oauth_url }}
 zookeeper.connect={{ zookeeper_url }}
-confluent.controlcenter.id=1
-confluent.controlcenter.data.dir=/opt/confluent/control-center
-confluent.controlcenter.internal.topics.replication=2
-confluent.controlcenter.command.topic.replication=2
+confluent.controlcenter.id={{ control_center_id }}
+confluent.controlcenter.data.dir={{ control_center_datadir }}
 confluent.controlcenter.ui.autoupdate.enable=false
 confluent.controlcenter.usage.data.collection.enable=false
 
@@ -13,4 +11,7 @@ confluent.controlcenter.streams.security.protocol=SASL_PLAINTEXT
 confluent.controlcenter.kafka.kcluster.security.protocol=SASL_PLAINTEXT
 confluent.controlcenter.rest.authentication.method=BEARER
 public.key.path={{ mds_public_key }}
+
 confluent.monitoring.interceptor.topic.replication=2
+confluent.controlcenter.internal.topics.replication=2
+confluent.controlcenter.command.topic.replication=2

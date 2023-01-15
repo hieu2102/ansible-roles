@@ -1,0 +1,29 @@
+---
+- name: Install Packages
+  ansible.builtin.package:
+    name:
+      - confluent-control-center
+    state: present
+
+- name: Create Datadir
+  ansible.builtin.file:
+    state: directory
+    owner: "cp-control-center"
+    group: "confluent"
+    mode: "0775"
+    path: "{{ control_center_datadir }}"
+- name: Set Control Center Instance ID
+  ansible.builtin.set_fact:
+    control_center_id: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'].split('.')[3] }}"
+
+- name: Update Config File
+  ansible.builtin.template:
+    dest: /etc/confluent-control-center/control-center-production.properties
+    src: control-center.properties.j2
+    mode: "0644"
+
+- name: Start Service
+  ansible.builtin.systemd:
+    name: confluent-control-center
+    state: restarted
+    enabled: true
