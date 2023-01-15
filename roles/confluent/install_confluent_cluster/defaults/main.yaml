@@ -1,0 +1,11 @@
+---
+admin: ""
+admin_dn: "CN={{ admin }},CN=Users,DC=bnh,DC=vn"
+admin_password: ""
+group_search_base: "CN=Users,DC=bnh,DC=vn"
+ldap_url: ""
+user_search_base: "CN=Users,DC=bnh,DC=vn"
+auth_method: "LDAP"
+config_mds: true
+mds_private_key: "/opt/kafka/privateKey.pem"
+mds_public_key: "/opt/kafka/publicKey.pem"

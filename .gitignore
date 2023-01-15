@@ -1,5 +1,5 @@
 *.retry 
-roles/*/*/defaults/main.yaml
+roles/*/*/vars/main.yaml
 roles/linux/linux-update-dns-bind/files/*.db
 *.db
 roles/cloudera/cloudera_install_agent/files/hosts
@@ -8,3 +8,4 @@ roles/.DS_Store
 roles/**/.DS_Store
 .vscode/settings.json
 inventory
+roles/confluent/install_confluent_cluster/vars/main.yaml
