@@ -1,15 +1,16 @@
 {
 	"folders": [
 		{
-			"path": "/Users/hieunguyen/work/code/automation/ansible"
+			"path": "/Users/hieund/work/code/automation/ansible"
 		}
 	],
 	"settings": {
 		"files.associations": {
-			"*.yaml":"ansible"
+			"*.yaml":"ansible",
+			"*.j2":"ansible-jinja",
 			// "**/inventory/*.yaml": "yaml",
-			// "**/**/*.yaml": "ansible",
-			// "**/**/**/**/*.yaml": "ansible"
+			"**/**/*.yaml": "ansible",
+			"**/**/**/**/*.yaml": "ansible"
 		},
 		"files.exclude": {
 			"**/.git": true,

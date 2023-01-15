@@ -36,4 +36,3 @@
 - name: Install and Configure Control Center
   when: "'control-center' in group_names"
   ansible.builtin.include_tasks: install_control_center.yaml
-
