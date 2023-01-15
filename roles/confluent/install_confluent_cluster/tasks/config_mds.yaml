@@ -19,20 +19,24 @@
         - name: Create Directory
           ansible.builtin.file:
             path: /opt/kafka
-            owner: root
-            group: root
-            mode: "0664"
+            owner: cp-kafka
+            group: confluent
+            mode: "0775"
             state: directory
         - name: Transfer Private Key
           ansible.builtin.copy:
             dest: "{{ mds_private_key }}"
             src: "/tmp/privateKey.pem"
-            mode: "0644"
+            owner: cp-kafka
+            group: confluent
+            mode: "0665"
         - name: Transfer Public Key
           ansible.builtin.copy:
             dest: "{{ mds_public_key }}"
+            owner: cp-kafka
+            group: confluent
             src: "/tmp/publicKey.pem"
-            mode: "0644"
+            mode: "0665"
 
 - name: Add Metadata Service Config
   ansible.builtin.blockinfile:
@@ -40,59 +44,67 @@
     block: "{{ lookup('template', 'broker_mds.properties.j2') }}"
     marker: "# {mark} ANSIBLE MANAGED BLOCK FOR MDS CONFIGURATION"
 
-# - name: Add OAuth SASL Config
-#   ansible.builtin.blockinfile:
-#     dest: /etc/kafka/server.properties
-#     block: "{{ lookup('template', 'broker_oauth.properties.j2') }}"
-#     marker: "# {mark} ANSIBLE MANAGED BLOCK FOR OAUTH AUTHENTICATION"
+- name: Add OAuth SASL Config
+  ansible.builtin.blockinfile:
+    dest: /etc/kafka/server.properties
+    block: "{{ lookup('template', 'broker_oauth.properties.j2') }}"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK FOR OAUTH AUTHENTICATION"
 
-# - name: Update Broker Listeners Config
-#   block:
-#     - name: Transfer Script
-#       ansible.builtin.copy:
-#         src: update_config.sh
-#         dest: /tmp/update_config.sh
-#         mode: "0775"
-#     - name: Update listeners # noqa no-changed-when
-#       ansible.builtin.command: "sh /tmp/update_config.sh '/etc/kafka/server.properties' 'listeners' 'OAUTH://:9091'"
-#     - name: Update sasl.enabled.mechanisms # noqa no-changed-when
-#       ansible.builtin.command: "sh /tmp/update_config.sh '/etc/kafka/server.properties' 'sasl.enabled.mechanisms' 'OAUTHBEARER'"
-#     - name: Update listener.security.protocol.map # noqa no-changed-when
-#       ansible.builtin.command: "sh /tmp/update_config.sh '/etc/kafka/server.properties' 'listener.security.protocol.map' 'OAUTH:SASL_PLAINTEXT'"
+- name: Update Broker Listeners Config
+  block:
+    - name: Transfer Script
+      ansible.builtin.copy:
+        src: update_config.sh
+        dest: /tmp/update_config.sh
+        mode: "0775"
+    - name: Update listeners # noqa no-changed-when
+      ansible.builtin.command: "sh /tmp/update_config.sh '/etc/kafka/server.properties' 'listeners' 'OAUTH://:9091'"
+    - name: Update sasl.enabled.mechanisms # noqa no-changed-when
+      ansible.builtin.command: "sh /tmp/update_config.sh '/etc/kafka/server.properties' 'sasl.enabled.mechanisms' 'OAUTHBEARER'"
+    - name: Update listener.security.protocol.map # noqa no-changed-when
+      ansible.builtin.command: "sh /tmp/update_config.sh '/etc/kafka/server.properties' 'listener.security.protocol.map' 'OAUTH:SASL_PLAINTEXT'"
 
 - name: Restart Broker
   ansible.builtin.systemd:
     name: confluent-server
     state: restarted
-# - name: Set MDS URLs
-#   block:
-#     - name: List MDS URL # noqa jinja[spacing]
-#       ansible.builtin.set_fact:
-#         mds_url_list: "{{ mds_url_list | default([]) +  ['http://' + hostvars[item]['ansible_nodename'] + ':8090'] }}"
-#       loop: "{{ groups['broker'] }}"
-#     - name: Export MDS URLs
-#       ansible.builtin.set_fact:
-#         mds_url: "{{ mds_url_list | join(',') }}"
+- name: Set MDS Related Variables
+  block:
+    - name: List MDS URL # noqa jinja[spacing]
+      ansible.builtin.set_fact:
+        broker_oauth_list: "{{ broker_oauth_list | default([]) +  [hostvars[item]['ansible_nodename'] + ':9091'] }}"
+        mds_url_list: "{{ mds_url_list | default([]) +  ['http://' + hostvars[item]['ansible_nodename'] + ':8090'] }}"
+      loop: "{{ groups['broker'] }}"
+    - name: Export MDS URLs
+      ansible.builtin.set_fact:
+        broker_oauth_url: "{{ broker_oauth_list | join(',') }}"
+        mds_local_url: "{{ 'http://' + hostvars[inventory_hostname]['ansible_nodename'] + ':8090' }}"
+        mds_url: "{{ mds_url_list | join(',') }}"
 
-# - name: Create Admin User for Cluster
-#   delegate_to: "{{ groups.broker | first }}"
-#   block:
-#     - name: Transfer Script
-#       ansible.builtin.copy:
-#         src: create_mds_system_admin.sh
-#         dest: /tmp/create_mds_system_admin.sh
-#         mode: "0775"
-#     - name: Execute Script # noqa no-changed-when
-#       ansible.builtin.command: "sh /tmp/create_mds_system_admin.sh {{ zookeeper_url }} {{ admin }} {{ admin_password }} {{ mds_url }}"
+- name: Create Admin User for Cluster
+  delegate_to: "{{ groups.broker | first }}"
+  block:
+    - name: Wait for MDS to start
+      ansible.builtin.wait_for:
+        port: 8090
+        host: "{{ hostvars[inventory_hostname]['ansible_nodename'] }}"
+        sleep: 30
+    - name: Transfer Script
+      ansible.builtin.copy:
+        src: create_mds_system_admin.sh
+        dest: /tmp/create_mds_system_admin.sh
+        mode: "0775"
+    - name: Execute Script # noqa no-changed-when
+      ansible.builtin.command: "sh /tmp/create_mds_system_admin.sh {{ zookeeper_url }} {{ admin }} {{ admin_password }} {{ mds_local_url }}"
 
-# - name: Update Client Producer Config
-#   ansible.builtin.template:
-#     src: producer.properties.j2
-#     dest: /etc/kafka/producer.properties
-#     mode: "0644"
+- name: Update Client Producer Config
+  ansible.builtin.template:
+    src: producer.properties.j2
+    dest: /etc/kafka/producer.properties
+    mode: "0644"
 
-# - name: Update Client Consumer Config
-#   ansible.builtin.template:
-#     src: consumer.properties.j2
-#     dest: /etc/kafka/consumer.properties
-#     mode: "0644"
+- name: Update Client Consumer Config
+  ansible.builtin.template:
+    src: consumer.properties.j2
+    dest: /etc/kafka/consumer.properties
+    mode: "0644"
