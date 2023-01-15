@@ -1,0 +1,16 @@
+listeners=http://0.0.0.0:8081
+kafkastore.topic=_schemas
+debug=false
+
+kafkastore.bootstrap.servers={{ broker_oauth_url }}
+kafkastore.security.protocol=SASL_PLAINTEXT
+
+# kafkastore.sasl.mechanism=PLAIN
+# kafkastore.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="{{ admin }}" password="{{ admin_password }}";
+
+kafkastore.sasl.mechanism=OAUTHBEARER
+kafkastore.sasl.login.callback.handler.class=io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler
+kafkastore.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
+    metadataServerUrls="{{ mds_url }}" \
+    username="{{ admin }}" password="{{ admin_password }}" \
+    publicKeyPath="{{ mds_public_key }}";

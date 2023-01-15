@@ -1,0 +1,28 @@
+---
+- name: Install Package
+  ansible.builtin.package:
+    name: confluent-schema-registry
+    state: present
+
+- name: Update Config
+  ansible.builtin.template:
+    dest: /etc/schema-registry/schema-registry.properties
+    src: schema-registry.properties.j2
+    mode: '0644'
+
+- name: Add OAUTHBEARER handler lib to CLASSPATH
+  ansible.builtin.lineinfile:
+    path: "/usr/bin/schema-registry-run-class"
+    line: "CLASSPATH=$CLASSPATH:/usr/share/java/confluent-metadata-service/*"
+    state: present
+    insertafter: "^base_dir=.+"
+
+- name: Start Service
+  ansible.builtin.systemd:
+    name: confluent-schema-registry
+    state: restarted
+    enabled: true
+
+- name: Export Variables
+  ansible.builtin.set_fact:
+    schema_registry_url: "{{ hostvars[inventory_hostname]['ansible_nodename'] + ':8081' }}"
