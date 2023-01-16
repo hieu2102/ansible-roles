@@ -5,6 +5,21 @@
       - confluent-server
       - confluent-cli
     state: present
+- name: Set Broker Variables
+  block:
+    - name: List URL # noqa jinja[spacing]
+      ansible.builtin.set_fact:
+        broker_oauth_list: "{{ broker_oauth_list | default([]) +  [hostvars[item]['ansible_nodename'] + ':9091'] }}"
+        mds_url_list: "{{ mds_url_list | default([]) +  ['http://' + hostvars[item]['ansible_nodename'] + ':8090'] }}"
+        broker_url_list: "{{ broker_url_list | default([]) + [hostvars[item]['ansible_nodename'] +':9092'] }}"
+      loop: "{{ groups['broker'] }}"
+    - name: Export URLs
+      ansible.builtin.set_fact:
+        broker_oauth_url: "{{ broker_oauth_list | join(',') }}"
+        broker_url: "{{ broker_url_list | join(',') }}"
+        mds_local_url: "{{ 'http://' + hostvars[inventory_hostname]['ansible_nodename'] + ':8090' }}"
+        mds_url: "{{ mds_url_list | join(',') }}"
+
 - name: Set Broker ID
   ansible.builtin.set_fact:
     broker_id: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'].split('.')[3] }}"

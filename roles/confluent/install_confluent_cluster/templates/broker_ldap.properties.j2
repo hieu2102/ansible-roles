@@ -17,3 +17,10 @@ ldap.user.search.base={{ user_search_base }}
 listener.name.sasl_plaintext.sasl.enabled.mechanisms=PLAIN
 listener.name.sasl_plaintext.plain.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="{{ admin }}" password="{{ admin_password }}";
 listener.name.sasl_plaintext.plain.sasl.server.callback.handler.class=io.confluent.security.auth.provider.ldap.LdapAuthenticateCallbackHandler
+
+# Configure Metric Reporting
+metric.reporters=io.confluent.metrics.reporter.ConfluentMetricsReporter
+confluent.metrics.reporter.bootstrap.servers={{ broker_url }}
+confluent.metrics.reporter.security.protocol=SASL_PLAINTEXT
+confluent.metrics.reporter.sasl.mechanism=PLAIN
+confluent.metrics.reporter.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="{{ admin }}" password="{{ admin_password }}";

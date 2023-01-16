@@ -19,10 +19,16 @@
   block:
     - name: List ZK hosts
       ansible.builtin.set_fact:
-        zookeeper_url_list: "{{ zookeeper_url_list | default([]) + [ hostvars[item]['ansible_nodename'] + ':2181'] }}"
+        zookeeper_url_list: "{{ zookeeper_url_list | default([]) + [hostvars[item]['ansible_nodename'] + ':2181'] }}"
       loop: "{{ groups['zookeeper'] }}"
+    - name: List Schema Registry Hosts
+      ansible.builtin.set_fact:
+        schema_registry_url_list: "{{ schema_registry_url_list | default([]) + ['http://' hostvars[item]['ansible_nodename'] + ':8081'] }}"
+      loop: "{{ groups['registry'] }}"
+
     - name: Export Zookeeper URLs
       ansible.builtin.set_fact:
+        schema_registry_url: "{{ schema_registry_url_list | join(',') }}"
         zookeeper_url: "{{ zookeeper_url_list | join(',') }}"
 
 - name: Install and Configure Broker
@@ -32,6 +38,10 @@
 - name: Enable Metadata Service
   ansible.builtin.include_tasks: config_mds.yaml
   when: "'broker' in group_names"
+
+- name: Install Schema Registry
+  when: "'registry' in group_names"
+  ansible.builtin.include_tasks: install_schema_registry.yaml
 
 - name: Install and Configure Control Center
   when: "'control-center' in group_names"

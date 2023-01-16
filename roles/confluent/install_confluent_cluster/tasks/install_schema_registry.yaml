@@ -23,6 +23,8 @@
     state: restarted
     enabled: true
 
-- name: Export Variables
-  ansible.builtin.set_fact:
-    schema_registry_url: "{{ hostvars[inventory_hostname]['ansible_nodename'] + ':8081' }}"
+- name: Wait for Service to be Available
+  ansible.builtin.wait_for:
+    port: 8081
+    host: "{{ hostvars[inventory_hostname]['ansible_nodename'] }}"
+    sleep: 30
