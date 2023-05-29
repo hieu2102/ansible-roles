@@ -1,8 +1,8 @@
 [Confluent]
 name=Confluent repository
-baseurl=https://packages.confluent.io/rpm/7.2
+baseurl=https://packages.confluent.io/rpm/7.4
 gpgcheck=1
-gpgkey=https://packages.confluent.io/rpm/7.2/archive.key
+gpgkey=https://packages.confluent.io/rpm/7.4/archive.key
 enabled=1
 
 [Confluent-Clients]
