@@ -1,0 +1,9 @@
+---
+- name: Get Playbook Repository's Updates
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Get Playbook Repository's Updates
+      ansible.builtin.git:
+        repo: git@gitlab.bnh.vn:automation/ansible.git
+        dest: /opt/git/ansible

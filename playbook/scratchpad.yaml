@@ -1,0 +1,14 @@
+---
+- name: Scratchpad
+  hosts:
+    - broker
+  gather_facts: false
+
+  tasks:
+    - name: Restart service
+      ansible.builtin.systemd:
+        name: confluent-server
+        state: stopped
+        enabled: true
+    - name: Delete datadir
+      ansible.builtin.shell: "rm -fr /var/lib/kafka/*"

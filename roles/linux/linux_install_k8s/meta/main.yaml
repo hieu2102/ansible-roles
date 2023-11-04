@@ -1,0 +1,5 @@
+galaxy_info:
+  license: none
+  description: install k8s on Linux
+  role_name: linux_install_k8s
+  author: hieund2102@gmail.com

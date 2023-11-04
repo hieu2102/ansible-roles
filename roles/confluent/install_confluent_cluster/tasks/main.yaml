@@ -21,14 +21,14 @@
       ansible.builtin.set_fact:
         zookeeper_url_list: "{{ zookeeper_url_list | default([]) + [hostvars[item]['ansible_nodename'] + ':2181'] }}"
       loop: "{{ groups['zookeeper'] }}"
-    - name: List Schema Registry Hosts
-      ansible.builtin.set_fact:
-        schema_registry_url_list: "{{ schema_registry_url_list | default([]) + ['http://' + hostvars[item]['ansible_nodename'] + ':8081'] }}"
-      loop: "{{ groups['registry'] }}"
+    # - name: List Schema Registry Hosts
+    #   ansible.builtin.set_fact:
+    #     schema_registry_url_list: "{{ schema_registry_url_list | default([]) + ['http://' + hostvars[item]['ansible_nodename'] + ':8081'] }}"
+    #   loop: "{{ groups['registry'] }}"
 
     - name: Export Zookeeper URLs
       ansible.builtin.set_fact:
-        schema_registry_url: "{{ schema_registry_url_list | join(',') }}"
+        # schema_registry_url: "{{ schema_registry_url_list | join(',') }}"
         zookeeper_url: "{{ zookeeper_url_list | join(',') }}"
 
 - name: Install and Configure Broker
@@ -43,19 +43,19 @@
   when: "'registry' in group_names"
   ansible.builtin.include_tasks: install_schema_registry.yaml
 
-- name: Add Schema Registry URL(s) to Broker
-  when: "'broker' in group_names"
-  block:
-    - name: Add Registry URLs
-      ansible.builtin.lineinfile:
-        line: "confluent.schema.registry.url={{ schema_registry_url }}"
-        path: "/etc/kafka/server.properties"
-        state: present
-    - name: Restart Service
-      ansible.builtin.systemd:
-        name: confluent-server
-        state: restarted
+# - name: Add Schema Registry URL(s) to Broker
+#   when: "'broker' in group_names"
+#   block:
+#     - name: Add Registry URLs
+#       ansible.builtin.lineinfile:
+#         line: "confluent.schema.registry.url={{ schema_registry_url }}"
+#         path: "/etc/kafka/server.properties"
+#         state: present
+#     - name: Restart Service
+#       ansible.builtin.systemd:
+#         name: confluent-server
+#         state: restarted
 
-- name: Install and Configure Control Center
-  when: "'control-center' in group_names"
-  ansible.builtin.include_tasks: install_control_center.yaml
+# - name: Install and Configure Control Center
+#   when: "'control-center' in group_names"
+#   ansible.builtin.include_tasks: install_control_center.yaml

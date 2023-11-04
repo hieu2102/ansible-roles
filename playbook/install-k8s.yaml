@@ -1,0 +1,8 @@
+---
+- name: Install K8s
+  hosts: all
+  gather_facts: yes
+  tasks:
+    - name: Install
+      ansible.builtin.include_role:
+        name: linux/linux_install_k8s

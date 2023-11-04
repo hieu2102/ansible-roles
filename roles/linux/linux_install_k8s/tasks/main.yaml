@@ -1,0 +1,58 @@
+---
+- name: Configure OS
+  block:
+    - name: Set open files limit
+      ansible.builtin.blockinfile:
+        create: true
+        dest: /etc/security/limits.d/20-nproc.conf
+        content: |
+          # k8s configuration
+          * soft nofile 1048576
+          * hard nproc 1048576
+    - name: Disable swap
+      ansible.builtin.shell: |
+        swapoff -a
+        sed -i -e "s|^.* swap|#&|g" /etc/fstab
+    - name: Set logrotate
+      ansible.builtin.file:
+        path: /etc/logrotate.d/k8s
+        state: directory
+        mode: "0644"
+    - name: Install missing modules
+      block:
+        - name: List missing modules
+          ansible.builtin.shell: |
+            printf "" > /tmp/missing_modules.txt;
+
+            for module in br_netfilter ip6_udp_tunnel ip_set ip_set_hash_ip ip_set_hash_net iptable_filter iptable_nat iptable_mangle iptable_raw nf_conntrack_netlink nf_conntrack nf_conntrack_ipv4 nf_defrag_ipv4 nf_nat nf_nat_ipv4 nf_nat_masquerade_ipv4 nfnetlink udp_tunnel veth vxlan x_tables xt_addrtype xt_conntrack xt_comment xt_mark xt_multiport xt_nat xt_recent xt_set  xt_statistic xt_tcpudp;
+            do
+                if ! lsmod | grep -q $module; then
+                    find /lib/modules/ -name "$module".ko.xz >> /tmp/missing_modules.txt;
+                fi;
+            done
+        - name: Install missing_modules
+          ansible.builtin.shell: |
+            cat /tmp/missing_modules.txt | while read line;
+            do
+                insmod $line;
+            done
+    - name: Enable TCP forwarding
+      ansible.builtin.shell: sed -i -e "s|^#AllowTcpForwarding yes|AllowTcpForwarding yes|g" /etc/ssh/sshd_config
+    - name: Restart sshd
+      ansible.builtin.service:
+        name: sshd
+        state: restarted
+        enabled: true
+
+- name: Install binaries
+  when: "'master' in group_names"
+  block:
+    - name: Install kubectl
+      ansible.builtin.shell:
+        /usr/bin/curl -L "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" -o /tmp/kubectl;
+        mv /tmp/kubectl /usr/bin/kubectl && chmod u+x /usr/bin/kubectl
+    - name: Install rke
+      ansible.builtin.shell: export ASSET_TO_DOWNLOAD="rke_linux-amd64";
+        export RKE_VERSION="$(curl -L -s -o /dev/null -w %{url_effective} https://github.com/rancher/rke/releases/latest | sed -e 's|/| |g' |awk '{print $NF}')";
+        export DOWNLOAD_URL="https://github.com/rancher/rke/releases/download/${RKE_VERSION}/${ASSET_TO_DOWNLOAD}";
+        /usr/bin/curl -L "${DOWNLOAD_URL}" -o /usr/bin/rke && chmod u+x /usr/bin/rke;
