@@ -1,0 +1,8 @@
+---
+- name: install confluent
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: install
+      confluent.platform.all:
+      ignore_errors: true

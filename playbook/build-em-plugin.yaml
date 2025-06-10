@@ -1,5 +1,5 @@
 ---
-- name: Uild OEM Plugin
+- name: Build OEM Plugin
   hosts: oem
   gather_facts: false
   vars:

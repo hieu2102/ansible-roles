@@ -1,6 +1,6 @@
 ---
 # tasks file for gtm_install
-- name: Insatll Dependencies 
+- name: Install Dependencies 
   ansible.builtin.yum: 
     name: 
       - ncurses-compat-libs

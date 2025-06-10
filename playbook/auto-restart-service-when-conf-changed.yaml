@@ -1,0 +1,48 @@
+---
+- name: Configure Service Autorestart when Config File changed
+  hosts: all
+  gather_facts: false
+  vars:
+    svc_name: nginx
+    conf_file_path: /etc/nginx/nginx.conf
+  tasks:
+    - name: Configure Watcher Service
+      block:
+        - name: Watcher path file
+          ansible.builtin.blockinfile:
+            path: "/usr/lib/systemd/system/{{ svc_name }}-watcher.path"
+            append_newline: true
+            block: |
+              [Path]
+              Unit={{ svc_name }}-watcher.service
+              PathChanged={{ conf_file_path }}
+              # trigger on changes to a file not just create/delete
+              # don't put comments in the same line as the command
+
+              [Install]
+              WantedBy=multi-user.target
+        - name: Watcher service file
+          ansible.builtin.blockinfile:
+            path: "/usr/lib/systemd/system/{{ svc_name }}-watcher.service"
+            append_newline: true
+            block: |
+              [Unit]
+              Description={{ svc_name }} Watcher Service
+              After=network.target
+              StartLimitIntervalSec=10
+              StartLimitBurst=5
+
+              [Service]
+              Type=oneshot
+              ExecStart=/usr/bin/systemctl restart {{ svc_name }}.service
+
+              [Install]
+              WantedBy=multi-user.target
+    - name: Start watcher service
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: restarted
+        enabled: true
+      with_items:
+        - "{{ svc_name }}-watcher.service"
+        - "{{ svc_name }}-watcher.path"

@@ -1,0 +1,21 @@
+---
+- name: Test_connection
+  hosts:
+    - all
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: stop kafka
+      when: "'broker' in group_names"
+      ansible.builtin.systemd:
+        state: stopped
+        name: confluent-server
+    - name: delete broker datadir
+      when: "'broker' in group_names"
+      ansible.builtin.shell: "rm -fr /var/lib/kafka/*"
+    - name: start kafka
+      when: "'broker' in group_names"
+      ansible.builtin.systemd:
+        state: started
+        name: confluent-server

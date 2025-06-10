@@ -1,0 +1,67 @@
+---
+- name: Update Hazelcast Config
+  hosts: hazelcast
+  gather_facts: false
+  vars:
+    config_file: "/Users/hieunguyen/work/code/automation/ansible/playbook/mcr/hazelcast.xml"
+    client_config_file: "/Users/hieunguyen/work/code/automation/ansible/playbook/mcr/hazelcast-client.xml"
+    job_package: "/Users/hieunguyen/work/code/java/hazelcast-customization/target/hazelcast-customization-1.0-SNAPSHOT.jar"
+  tasks:
+    - name: Update Config File
+      ansible.builtin.copy:
+        src: "{{ config_file }}"
+        dest: /hazelcast/hazelcast-5.2.3/config/hazelcast.xml
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Update Client Config File
+      ansible.builtin.copy:
+        src: "{{ client_config_file }}"
+        dest: /hazelcast/hazelcast-5.2.3/config/hazelcast-client.xml
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Transfer JAR package
+      ansible.builtin.copy:
+        src: "{{ job_package }}"
+        dest: /hazelcast/hazelcast-5.2.3/lib/hazelcast-customization-1.0-SNAPSHOT.jar
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Transfer JAR package to custom-lib
+      ansible.builtin.copy:
+        src: "{{ job_package }}"
+        dest: /hazelcast/hazelcast-5.2.3/custom-lib/hazelcast-customization-1.0-SNAPSHOT.jar
+        owner: root
+        group: root
+        mode: '0644'
+
+
+    - name: Update common.sh
+      ansible.builtin.copy:
+        src: "/Users/hieunguyen/work/code/automation/ansible/playbook/mcr/common.sh"
+        dest: "/hazelcast/hazelcast-5.2.3/bin/common.sh"
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Restart Cluster
+      block:
+        - name: Restart all but one
+          when: inventory_hostname not in ["hz1"]
+          ansible.builtin.systemd:
+            name: hazelcast
+            state: restarted
+            enabled: true
+    #     - name: Wait for service
+    #       ansible.builtin.wait_for:
+    #         host: 172.17.202.130
+    #         port: 8686
+    #         delay: 0
+    #         timeout: 30
+    #       when: inventory_hostname in ["hz3"]
+    #     - name: Restart
+    #       ansible.builtin.systemd:
+    #         name: hazelcast
+    #         state: restarted
+    #         enabled: true
+    #       when: inventory_hostname in ["hz3"]

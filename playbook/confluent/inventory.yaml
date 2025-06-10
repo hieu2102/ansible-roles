@@ -1,0 +1,105 @@
+---
+all:
+  vars:
+    ansible_connection: ssh
+    ansible_user: root
+    ansible_become: true
+    ansible_ssh_private_key_file: /Users/hieunguyen/.ssh/id_rsa
+    ## TLS Configuration - Custom Certificates
+    ssl_enabled: true
+    #### SASL Authentication Configuration - Choose the one that suit your requirements and configure according ####
+    ## By default there will be no SASL Authentication
+    ## For SASL/PLAIN uncomment this line:
+    sasl_protocol: plain
+    ## For SASL/SCRAM uncomment this line:
+    # sasl_protocol: scram
+    ## For SASL/GSSAPI uncomment this line and see Kerberos Configuration properties below
+    # sasl_protocol: kerberos
+
+    ## RBAC Configuration
+    rbac_enabled: true
+
+    ## LDAP CONFIGURATION
+    kafka_broker_custom_properties:
+      ldap.java.naming.factory.initial: com.sun.jndi.ldap.LdapCtxFactory
+      ldap.com.sun.jndi.ldap.read.timeout: 3000
+      ldap.java.naming.provider.url: ldap://code-server.bnh.vn:389
+      ldap.java.naming.security.principal: cn=mds,OU=rbac,dc=bnh,dc=vn
+      ldap.java.naming.security.credentials: oracle_4U
+      ldap.java.naming.security.authentication: simple
+      ldap.user.search.base: OU=rbac,dc=bnh,dc=vn
+      ldap.group.search.base: OU=rbac,dc=bnh,dc=vn
+      ldap.user.name.attribute: cn
+      ldap.user.memberof.attribute.pattern: CN=(.*),OU=rbac,dc=bnh,dc=vn
+      ldap.group.name.attribute: cn
+      ldap.group.member.attribute.pattern: CN=(.*),OU=rbac,dc=bnh,dc=vn
+      ldap.user.object.class: person
+
+    ## LDAP USERS
+    mds_super_user: mds
+    mds_super_user_password: oracle_4U
+    kafka_broker_ldap_user: kafka_broker
+    kafka_broker_ldap_password: oracle_4U
+    schema_registry_ldap_user: schema_registry
+    schema_registry_ldap_password: oracle_4U
+    kafka_connect_ldap_user: connect_worker
+    kafka_connect_ldap_password: oracle_4U
+    ksql_ldap_user: ksql
+    ksql_ldap_password: oracle_4U
+    kafka_rest_ldap_user: rest_proxy
+    kafka_rest_ldap_password: oracle_4U
+    control_center_ldap_user: control_center
+    control_center_ldap_password: oracle_4U
+
+    ## (OPTIONAL) SYSTEM ADMINS (SYSTEM ADMIN ROLEBINDINGS)
+    # A list of principals can be specified for all the componentes using 'rbac_component_additional_system_admins:'
+    # Or individual components [component]_additional_system_admins (i.e. schema_registry_additional_system_admins)
+
+    ## Varibles to enable SSO in Control Center
+    sso_mode: oidc
+    # necessary configs in MDS server for sso in C3
+    sso_groups_claim: groups  # default
+    sso_sub_claim: sub        # default
+    sso_groups_scope: groups # scope is optional, depending on the Idp
+    sso_issuer_url: http://10.10.11.49:8080/realms/shbsso
+    sso_jwks_uri: http://10.10.11.49:8080/realms/shbsso/protocol/openid-connect/certs
+    sso_authorize_uri: http://10.10.11.49:8080/realms/shbsso/protocol/openid-connect/auth
+    sso_token_uri: http://10.10.11.49:8080/realms/shbsso/protocol/openid-connect/token
+    sso_client_id: kafka
+    sso_client_password: bZXkbMWmMqotx7jJPrA8UeELpEhrmAbb
+    sso_refresh_token: true   # defaults to true
+
+
+
+
+zookeeper:
+  hosts:
+    T-KAFKA-1.bnh.vn:
+    T-KAFKA-2.bnh.vn:
+    T-KAFKA-3.bnh.vn:
+
+kafka_broker:
+  hosts:
+    T-KAFKA-1.bnh.vn:
+    T-KAFKA-2.bnh.vn:
+    T-KAFKA-3.bnh.vn:
+
+schema_registry:
+  hosts:
+     T-KAFKA-2.bnh.vn:
+
+# kafka_connect:
+#   hosts:
+#     T-KAFKA-2.bnh.vn:
+
+# kafka_rest:
+#   hosts:
+#     T-KAFKA-2.bnh.vn:
+
+# ksql:
+#   hosts:
+#     T-KAFKA-3.bnh.vn:
+
+control_center:
+  hosts:
+    T-KAFKA-1.bnh.vn:
